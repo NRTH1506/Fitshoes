@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Đăng ký - FitShoes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/utils.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+    <div class="auth-wrapper">
+        <div class="auth-container auth-register">
+            <!-- Left Side - Branding -->
+            <div class="auth-brand">
+                <div class="brand-logo">
+                    <i class="fas fa-shoe-prints"></i>
+                </div>
+                <h1>FitShoes</h1>
+                <p>Gia nhập cộng đồng của chúng tôi</p>
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Đăng ký miễn phí</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Mua sắm dễ dàng</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Tích lũy điểm thưởng</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Form -->
+            <div class="auth-form-container">
+                <div class="auth-form">
+                    <h2>Tạo tài khoản mới</h2>
+                    <p class="auth-form-subtitle">Tham gia FitShoes hôm nay</p>
+
+                    <form id="register-form" novalidate>
+                        <div class="form-group">
+                            <label for="name">
+                                <i class="fas fa-user"></i> Họ và tên
+                            </label>
+                            <input id="name" name="name" type="text" placeholder="Nguyễn Văn A" required class="auth-input">
+                            <div class="error-message" id="err-name"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i> Email
+                            </label>
+                            <input id="email" name="email" type="email" placeholder="you@example.com" required class="auth-input">
+                            <div class="error-message" id="err-email"></div>
+                        </div>
+
+                        <div class="form-row-two">
+                            <div class="form-group">
+                                <label for="password">
+                                    <i class="fas fa-lock"></i> Mật khẩu
+                                </label>
+                                <div class="password-wrapper">
+                                    <input id="password" name="password" type="password" placeholder="••••••••" required class="auth-input">
+                                    <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="error-message" id="err-password"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm">
+                                    <i class="fas fa-check-circle"></i> Xác nhận
+                                </label>
+                                <div class="password-wrapper">
+                                    <input id="confirm" name="confirm" type="password" placeholder="••••••••" required class="auth-input">
+                                    <button type="button" class="toggle-password" onclick="togglePassword('confirm')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="error-message" id="err-confirm"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-row-two">
+                            <div class="form-group">
+                                <label for="phone">
+                                    <i class="fas fa-phone"></i> Số điện thoại
+                                </label>
+                                <input id="phone" name="phone" type="tel" placeholder="0901234567" required class="auth-input">
+                                <div class="error-message" id="err-phone"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gender">
+                                    <i class="fas fa-venus-mars"></i> Giới tính
+                                </label>
+                                <select id="gender" name="gender" required class="auth-input">
+                                    <option value="">-- Chọn --</option>
+                                    <option value="male">Nam</option>
+                                    <option value="female">Nữ</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                                <div class="error-message" id="err-gender"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">
+                                <i class="fas fa-map-marker-alt"></i> Địa chỉ
+                            </label>
+                            <textarea id="address" name="address" placeholder="123 Đường ABC, Quận 1, TP.HCM" required class="auth-input auth-textarea"></textarea>
+                            <div class="error-message" id="err-address"></div>
+                        </div>
+
+                        <button type="submit" class="btn-auth-submit">
+                            <span>Đăng ký</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+
+                    <div class="auth-footer">
+                        <p>Bạn đã có tài khoản? <a href="login.html" class="auth-link">Đăng nhập</a></p>
+                        <a href="index.html" class="auth-back-link">
+                            <i class="fas fa-arrow-left"></i> Trở về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = event.target.closest('.toggle-password');
+            if (field.type === 'password') {
+                field.type = 'text';
+                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                field.type = 'password';
+                button.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+    </script>
+    <script src="js/register.js"></script>
+    <script src="https://kit.fontawesome.com/8769ee6e50.js" crossorigin="anonymous"></script>
+</body>
+</html>

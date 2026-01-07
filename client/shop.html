@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Cửa hàng - FitShoes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/utils.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/media-queries.css">
+    <style>
+        /* Shop Page Styling */
+        .shop-header {
+            background: linear-gradient(135deg, #153356 0%, #667eea 100%);
+            color: #fff;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+            border-radius: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shop-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            transform: translate(100px, -50px);
+        }
+
+        .shop-header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .shop-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .shop-header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: linear-gradient(to right, rgba(21, 51, 86, 0.05), rgba(102, 126, 234, 0.05));
+            border-radius: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid #153356;
+            background: #fff;
+            color: #153356;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #153356, #667eea);
+            z-index: -1;
+            transition: left 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            color: #fff;
+            border-color: #153356;
+            left: 0;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #153356, #667eea);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(21, 51, 86, 0.3);
+        }
+
+        .filter-btn:hover::before {
+            left: 0;
+        }
+
+        #product-count {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #153356;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        #product-count::before {
+            content: '📦';
+            font-size: 1.3rem;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .product-card {
+            background: #fff;
+            border-radius: 1.2rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(21, 51, 86, 0.15);
+        }
+
+        .product-image-container {
+            position: relative;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf1 100%);
+            padding: 2rem;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-image-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .product-card:hover .product-image-container::before {
+            opacity: 1;
+        }
+
+        .product-card img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.08);
+        }
+
+        .product-info {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .product-brand {
+            font-size: 0.85rem;
+            color: #667eea;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-card h3 {
+            font-size: 1.1rem;
+            color: #153356;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-description {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 1.6rem;
+            color: #153356;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            margin-top: auto;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: auto;
+        }
+
+        .add-to-cart-btn {
+            flex: 1;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 0.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(0);
+        }
+
+        .detail-link {
+            flex: 1;
+            padding: 0.9rem;
+            background: transparent;
+            color: #153356;
+            border: 2px solid #153356;
+            border-radius: 0.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+
+        .detail-link:hover {
+            background: #153356;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: #153356;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .shop-header {
+                padding: 2.5rem 0;
+                margin-bottom: 2rem;
+            }
+
+            .shop-header h1 {
+                font-size: 2rem;
+            }
+
+            .shop-header p {
+                font-size: 1rem;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            #product-count {
+                width: 100%;
+                justify-content: center;
+                padding: 1rem;
+                background: rgba(21, 51, 86, 0.05);
+                border-radius: 0.8rem;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .shop-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .shop-header p {
+                font-size: 0.95rem;
+            }
+
+            .filter-buttons {
+                gap: 0.5rem;
+            }
+
+            .filter-btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+
+            .product-image-container {
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <nav class="d-flex padding-inline justify-between align-center">
+                <div class="logo-box d-flex align-center">
+                    <img src="assets/images/nike-logo-2.png" alt="nike-logo">
+                    <h2>FitShoes</h2>
+                </div>
+                <div class="nav-links">
+                    <ul class="d-flex align-center">
+                        <li><a href="index2.html">Trang chủ</a></li>
+                        <li id="login-link-item" style="display: none;"><a href="login.html" class="login-btn">Đăng nhập</a></li>
+                        <li><a href="profile.html" id="profile-link" style="display: none;">Hồ sơ</a></li>
+                        <li>
+                            <a href="cart.html" class="cart-btn" title="Giỏ hàng" style="color:var(--white); display:flex; align-items:center; gap:.6rem;">
+                                <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                                <span id="cart-count">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <span class="mobile-toggle-btn"><i class="fa fa-bars"></i></span>
+            </nav>
+        </header>
+
+        <main class="padding-inline">
+            <section class="shop-header">
+                <div class="max-width-center padding-inline shop-header-content">
+                    <h1>Danh sách sản phẩm</h1>
+                    <p>Khám phá bộ sưu tập giày cao cấp mới nhất từ FitShoes</p>
+                </div>
+            </section>
+
+            <section class="max-width-center">
+                <div class="filter-section">
+                    <div class="filter-buttons">
+                        <button id="filter-all" class="filter-btn active">
+                            <i class="fa fa-th"></i> Tất cả
+                        </button>
+                        <button id="filter-male" class="filter-btn">
+                            <i class="fa fa-male"></i> Nam
+                        </button>
+                        <button id="filter-female" class="filter-btn">
+                            <i class="fa fa-female"></i> Nữ
+                        </button>
+                        <button id="filter-unisex" class="filter-btn">
+                            <i class="fa fa-universal-access"></i> Unisex
+                        </button>
+                    </div>
+                    <div id="product-count">Hiển thị 0 sản phẩm</div>
+                </div>
+
+                <div class="products-grid" id="shop-root">
+                    <!-- Product cards rendered by js/shop.js -->
+                </div>
+
+                <script>
+                    // show a loading message so user knows JS is running; shop.js will replace this
+                    try{
+                        const root = document.getElementById('shop-root');
+                        if(root) root.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">⏳</div><h3>Đang tải sản phẩm...</h3><p>Vui lòng chờ một chút</p></div>';
+                    }catch(e){/* ignore */}
+
+                    // show runtime errors on page to help debugging
+                    window.addEventListener('error', function(ev){
+                        const box = document.createElement('div');
+                        box.style.position = 'fixed';
+                        box.style.left = '1rem';
+                        box.style.top = '1rem';
+                        box.style.zIndex = 99999;
+                        box.style.background = 'rgba(255,0,0,0.9)';
+                        box.style.color = '#fff';
+                        box.style.padding = '1rem';
+                        box.style.borderRadius = '6px';
+                        box.textContent = 'JS Error: ' + (ev && ev.message ? ev.message : JSON.stringify(ev));
+                        document.body.appendChild(box);
+                    });
+                </script>
+            </section>
+        </main>
+
+        <footer class="padding-inline">
+            <div class="footer-center max-width-center">
+                <div class="footer-links-box">
+                    <h3>Cửa hàng</h3>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/header-auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="https://kit.fontawesome.com/8769ee6e50.js" crossorigin="anonymous"></script>
+</body>
+</html>
