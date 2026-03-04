@@ -27,7 +27,24 @@ const { logProductAdd, logProductDelete, logProductUpdate } = require('./middlew
 const app = express();
 const hasher = new PasswordHasher(10); // Khởi tạo hasher
 const PORT = process.env.PORT || 8081;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/fitshoes';
+const MONGOURI = process.env.MONGODB_URI || process.env.MONGO_URI;
+console.log("MONGOURI =", MONGOURI);
+
+// --- Kết nối MongoDB ---
+mongoose.connect(MONGOURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('✅ MongoDB connected'))
+    .catch(err => {
+        console.warn('⚠️ MongoDB connection error (continuing with static fallback):', err && err.message);
+    });
+// Track DB connection state
+let dbConnected = false;
+mongoose.connection.on('connected', () => { dbConnected = true; console.log('MongoDB connection readyState=1'); });
+mongoose.connection.on('disconnected', () => { dbConnected = false; console.log('MongoDB disconnected'); });
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason && (reason.stack || reason));
+});
+
+
 
 // Cấu hình Google Client ID
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
@@ -63,7 +80,7 @@ if (GMAIL_USER && GMAIL_APP_PASSWORD) {
 
 
 // --- Cấu hình CORS (Đã được chỉ định) ---
-const FE_ORIGINS = (process.env.FE_ORIGINS || 'http://localhost:8080,http://localhost:8081').split(',').map(s => s.trim());
+const FE_ORIGINS = (process.env.FE_ORIGINS || 'https://fitshoes.onrender.com').split(',').map(s => s.trim());
 
 const corsOptions = {
     origin: function(origin, callback){
@@ -154,16 +171,6 @@ const orderSchema = new mongoose.Schema({
 const Order = mongoose.model("Order", orderSchema);
 
 
-// --- Kết nối MongoDB ---
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('✅ MongoDB connected'))
-    .catch(err => {
-        console.warn('⚠️ MongoDB connection error (continuing with static fallback):', err && err.message);
-    });
-// Track DB connection state
-let dbConnected = false;
-mongoose.connection.on('connected', () => { dbConnected = true; console.log('MongoDB connection readyState=1'); });
-mongoose.connection.on('disconnected', () => { dbConnected = false; console.log('MongoDB disconnected'); });
 
 // --- API: Đăng ký tài khoản ---
 app.post('/api/register', async (req, res) => {
@@ -699,7 +706,7 @@ app.post("/api/pay/zalopay", async (req, res) => {
 
         // Link redirect sau khi thanh toán xong trên giao diện ZaloPay
         const embed_data = {
-            redirecturl: "http://localhost:8081/payment-success.html"
+            redirecturl: "https://fitshoes.onrender.compayment-success.html"
         };
 
         const orderData = {
@@ -720,7 +727,7 @@ app.post("/api/pay/zalopay", async (req, res) => {
             // QUAN TRỌNG: Link này phải public ra internet (dùng Ngrok)
             // Nếu để localhost, ZaloPay sẽ KHÔNG gọi được.
             // Đã cập nhật link Ngrok mới của bạn:
-            callback_url: "https://breanna-extraordinary-facetiously.ngrok-free.dev/api/zalopay/callback" 
+            callback_url: "https://fitshoes.onrender.com/api/zalopay/callback" 
         };
 
         // Tạo chữ ký MAC (Dùng KEY 1)

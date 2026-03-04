@@ -4,5 +4,9 @@
     "crypto": "^1.0.1",
     "moment": "^2.30.1",
     "mongodb": "^7.1.0"
+  },
+  
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }

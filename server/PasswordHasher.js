@@ -1,5 +1,5 @@
 // Import thư viện bcrypt — chuyên dùng để mã hoá (hash) mật khẩu
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // Định nghĩa class PasswordHasher để gom tất cả logic hash & verify password
 class PasswordHasher {
