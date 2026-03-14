@@ -12,8 +12,9 @@ try { require('dotenv').config(); } catch (e) { /* dotenv optional */ }
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const PasswordHasher = require('./PasswordHasher'); 
-// THÊM: Thư viện Google OAuth và Nodemailer
 const { OAuth2Client } = require('google-auth-library');
 const nodemailer = require('nodemailer');
 
@@ -63,7 +64,7 @@ if (GMAIL_USER && GMAIL_APP_PASSWORD) {
 
 
 // --- Cấu hình CORS (Đã được chỉ định) ---
-const FE_ORIGINS = (process.env.FE_ORIGINS || 'http://localhost:8080,http://localhost:8081').split(',').map(s => s.trim());
+const FE_ORIGINS = (process.env.FE_ORIGINS || 'http://localhost:5173,http://localhost:8081').split(',').map(s => s.trim());
 
 const corsOptions = {
     origin: function(origin, callback){
@@ -72,32 +73,37 @@ const corsOptions = {
         return callback(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-key'],
+    credentials: true
 };
 
+app.use(cors(corsOptions));
+
+// --- Trust proxy (Render / Vercel reverse proxy) ---
+app.set('trust proxy', 1);
+
+// --- HTTPS redirect in production ---
 if (process.env.NODE_ENV === 'production') {
-    app.use(cors(corsOptions));
-} else {
-    console.warn('CORS: development mode - allowing all origins');
-    app.use(cors());
+    app.use((req, res, next) => {
+        if (req.headers['x-forwarded-proto'] !== 'https') {
+            return res.redirect(301, `https://${req.hostname}${req.url}`);
+        }
+        next();
+    });
 }
+
+// --- Security middleware ---
+app.use(helmet({ contentSecurityPolicy: false }));
+
+// --- Rate limiting on auth endpoints ---
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'Quá nhiều yêu cầu, vui lòng thử lại sau.' } });
 
 // --- Apply HTTP Logger Middleware (log all requests) ---
 app.use(logHttpRequest);
 
 // --- Middleware ---
-app.use(express.json()); // Xử lý body là JSON
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-    res.setHeader(
-        "Content-Security-Policy",
-        // Cho phép tất cả (*) bao gồm cả font, ảnh, data (base64)
-        "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
-        "font-src * data:; " + 
-        "img-src * data: blob:;"
-    );
-    next();
-});
 
 // --- Mongoose Schema & Model ---
 const userSchema = new mongoose.Schema({
@@ -155,7 +161,7 @@ const Order = mongoose.model("Order", orderSchema);
 
 
 // --- Kết nối MongoDB ---
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ MongoDB connected'))
     .catch(err => {
         console.warn('⚠️ MongoDB connection error (continuing with static fallback):', err && err.message);
@@ -165,8 +171,13 @@ let dbConnected = false;
 mongoose.connection.on('connected', () => { dbConnected = true; console.log('MongoDB connection readyState=1'); });
 mongoose.connection.on('disconnected', () => { dbConnected = false; console.log('MongoDB disconnected'); });
 
+// --- API: Health Check ---
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', db: dbConnected, timestamp: new Date().toISOString() });
+});
+
 // --- API: Đăng ký tài khoản ---
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', authLimiter, async (req, res) => {
     try {
         if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
         const { name, email, password, phone, gender, address } = req.body || {};
@@ -227,7 +238,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 // --- API: Đăng nhập (Yêu cầu OTP) ---
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', authLimiter, async (req, res) => {
     try {
         if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
         const { email, password } = req.body || {};
@@ -347,7 +358,7 @@ app.post('/api/login-google', async (req, res) => {
 });
 
 // --- API: Xác thực OTP (Từ File 2) ---
-app.post('/api/verify-otp', async (req, res) => {
+app.post('/api/verify-otp', authLimiter, async (req, res) => {
     try {
         const { email, code } = req.body || {};
         if (!email || !code) return res.status(400).json({ success: false, message: 'Missing email or code' });
@@ -680,10 +691,10 @@ app.put('/api/profile', async (req, res) => {
 
 // ============================ ZALOPAY CONFIG ============================
 const ZALOPAY = {
-    app_id: 554,
-    key1: "8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn",
-    key2: "uUfsWgfLkRLzq6W2uNXTCxrfxs51auny", // Key2 dùng để xác thực Callback
-    endpoint: "https://sb-openapi.zalopay.vn/v2/create"
+    app_id: parseInt(process.env.ZALOPAY_APP_ID) || 554,
+    key1: process.env.ZALOPAY_KEY1 || "8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn",
+    key2: process.env.ZALOPAY_KEY2 || "uUfsWgfLkRLzq6W2uNXTCxrfxs51auny",
+    endpoint: process.env.ZALOPAY_ENDPOINT || "https://sb-openapi.zalopay.vn/v2/create"
 };
 
 // ============================ 1. API TẠO ĐƠN HÀNG ============================
@@ -699,7 +710,7 @@ app.post("/api/pay/zalopay", async (req, res) => {
 
         // Link redirect sau khi thanh toán xong trên giao diện ZaloPay
         const embed_data = {
-            redirecturl: "http://localhost:8081/payment-success.html"
+            redirecturl: (process.env.FE_URL || "http://localhost:5173") + "/payment-success"
         };
 
         const orderData = {
@@ -720,7 +731,7 @@ app.post("/api/pay/zalopay", async (req, res) => {
             // QUAN TRỌNG: Link này phải public ra internet (dùng Ngrok)
             // Nếu để localhost, ZaloPay sẽ KHÔNG gọi được.
             // Đã cập nhật link Ngrok mới của bạn:
-            callback_url: "https://breanna-extraordinary-facetiously.ngrok-free.dev/api/zalopay/callback" 
+            callback_url: process.env.ZALOPAY_CALLBACK_URL || "http://localhost:8081/api/zalopay/callback" 
         };
 
         // Tạo chữ ký MAC (Dùng KEY 1)
@@ -848,60 +859,13 @@ app.post("/api/zalopay/callback", async (req, res) => {
     res.json(result);
 });
 
-app.get("/api/force-success/:app_trans_id", async (req, res) => {
-    try {
-        const { app_trans_id } = req.params;
-        
-        // 1. Cập nhật DB
-        const order = await Order.findOneAndUpdate(
-            { app_trans_id: app_trans_id },
-            { status: "SUCCESS" },
-            { new: true }
-        );
-
-        if (!order) {
-            return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
-        }
-
-        // 2. Gửi Email (Copy logic gửi mail vào đây để test mail luôn)
-        if (mailTransporter) {
-            const mailOptions = {
-                from: GMAIL_USER,
-                to: "email_cua_ban_de_test@gmail.com", // <--- Điền email của bạn vào đây
-                subject: `[TEST FORCE] Thanh toán thành công #${app_trans_id}`,
-                html: `<h3>Đơn hàng ${app_trans_id} đã được kích hoạt thành công bằng tay!</h3>`
-            };
-            mailTransporter.sendMail(mailOptions);
-        }
-
-        return res.json({ 
-            success: true, 
-            message: "Đã ép trạng thái thành SUCCESS", 
-            order 
-        });
-
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
-});
-
-
-// --- Serve frontend static files from ../client ---
-const clientPath = path.join(__dirname, '..', 'client');
-app.use(express.static(clientPath));
-
 // --- Import và sử dụng Chatbot Routes ---
 const chatbotRoutes = require('./routes/chatbot');
 app.use('/api', chatbotRoutes);
 
-// Dùng app.use để bắt lỗi API 404 và phục vụ index.html cho SPA
-// Treat /api and /admin server endpoints as API-style requests that should return JSON
-app.use((req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/admin')) {
-        return res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
-    }
-    // otherwise serve index.html (SPA) so direct navigation works
-    res.sendFile(path.join(clientPath, 'index.html'));
+// API 404 handler — pure API server, no static files
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
 });
 
 // --- Apply Error Logger Middleware (must be last) ---
