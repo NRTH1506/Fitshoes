@@ -37,28 +37,15 @@ export default function Navbar() {
         <button
           onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
           title={lang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
-          style={{
-            background: 'rgba(255,255,255,0.15)',
-            border: '2px solid rgba(255,255,255,0.3)',
-            borderRadius: '0.6rem',
-            padding: '0.5rem 0.8rem',
-            cursor: 'pointer',
-            fontSize: '1.3rem',
-            color: '#fff',
-            fontWeight: 600,
-            transition: 'all 0.3s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-          }}
+          className="lang-toggle-btn"
         >
-          {lang === 'vi' ? '🇬🇧 EN' : '🇻🇳 VI'}
+          {lang === 'vi' ? 'EN' : 'VI'}
         </button>
 
         {user ? (
           <>
             <Link to="/profile" className="login-btn"><i className="fa fa-user"></i> {user.name?.split(' ')[0] || t('nav.profile')}</Link>
-            <button onClick={logout} className="login-btn" style={{ background: 'rgba(255,107,107,0.3)', borderColor: 'rgba(255,107,107,0.5)' }}>
+            <button onClick={logout} className="login-btn">
               {t('nav.logout')}
             </button>
           </>
