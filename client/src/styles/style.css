@@ -190,7 +190,7 @@ nav {
 
 
 .logo-box h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 400;
     margin-left: 1rem;
     letter-spacing: 0.2rem;
@@ -208,7 +208,7 @@ nav {
 
 .nav-links ul li a {
     color: var(--white);
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     text-transform: uppercase;
     letter-spacing: 0.15rem;
     font-weight: 500;

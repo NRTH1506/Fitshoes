@@ -9,13 +9,25 @@ export default function Navbar() {
   const { cart } = useCart();
   const { t, lang, setLang } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const totalItems = cart.reduce((s, i) => s + i.qty, 0);
 
   const isHome = location.pathname === '/';
 
+  // Add scroll event listener to track when to solidify the navbar
+  useState(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Use fixed positioning so it follows you down
+  const navStyle = { position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 1000 };
+  const navClass = `d-flex justify-between align-center padding-inline ${(!isHome || scrolled) ? 'nav-dark' : ''}`;
+
   return (
-    <nav className={`d-flex justify-between align-center padding-inline ${!isHome ? 'nav-dark' : ''}`} style={isHome ? { position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 100 } : {}}>
+    <nav className={navClass} style={navStyle}>
       <Link to="/" className="logo-box d-flex align-center">
         <h2>FitShoes</h2>
       </Link>
