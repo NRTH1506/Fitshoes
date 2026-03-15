@@ -196,7 +196,7 @@ nav {
     font-weight: 700;
     margin-left: 1rem;
     letter-spacing: 1.2px;
-    color: var(--white);
+    color: #00E5FF;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
@@ -209,7 +209,7 @@ nav {
 }
 
 .nav-links ul li a {
-    color: var(--white);
+    color: #00E5FF; /* Bright cyan for better visibility */
     font-size: 1.35rem;
     letter-spacing: .08rem;
     transform: scale(1);
@@ -302,17 +302,21 @@ nav .social-media-icons a {
 }
 
 #hero-text h2 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     letter-spacing: 1.1px;
     margin-top: 2rem;
-     margin-bottom:3rem;
-    font-weight:600;
-    color: var(--main-color);
-    background-color: white;
-    padding: .3rem .6rem;
-    border-radius: .4rem;
+    margin-bottom: 3rem;
+    font-weight: 500;
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.6rem 1.2rem;
+    border-radius: 2rem; /* Pill shape */
     transition: all .3s linear;
-    cursor: pointer;
+    cursor: default;
+    display: inline-block;
 }
 
 #hero-text h1 {
