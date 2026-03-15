@@ -159,11 +159,13 @@ p {
 **********************************************************/
 header {
     width: 100%;
-    background-image: linear-gradient(rgb(0 0 0 / 34%), transparent), url(/assets/images/hero-3.jpg);
+    /* Use a rich dynamic gradient instead of a dark solid overlay */
+    background-image: linear-gradient(135deg, rgba(21, 51, 86, 0.85) 0%, rgba(102, 126, 234, 0.7) 100%), url(/assets/images/hero.jpg);
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: center 30%;
     background-size: cover;
     overflow: hidden;
+    position: relative;
 }
 
 
@@ -171,10 +173,14 @@ header {
   Nav Start
 **********************************************************/
 nav {
-    padding-block: 1rem;
+    padding-block: 1.5rem;
     position: relative;
-    background: #153356;
-    backdrop-filter: blur(3px);
+    /* Glassmorphism Navigation */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 100;
 }
 
 
@@ -385,59 +391,91 @@ nav .social-media-icons a {
    Services Section Start
 **********************************************************/
 
-.service-box {
-    border-right: 1px solid var(--grey-color);
+#services-section {
+    gap: 2rem;
     padding: 2rem;
-    transition: all .3s linear;
-    background-color: var(--white);
-    cursor: pointer;
+    background-color: #f9f9fb;
+    border: none;
+    box-shadow: none;
 }
 
-.service-box:last-child {
-    border: none;
+.service-box {
+    padding: 3rem 2rem;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+    cursor: pointer;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.05);
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
+
 
 @media (hover:hover) {
     .service-box:hover {
-        box-shadow: 0 0 1rem rgba(0, 0, 0, 0.265) inset;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+        border-color: transparent;
     }
 }
 
 
 .service-box .service-icon {
-    font-size: 3rem;
-    color: var(--grey-color);
-    margin-bottom: 1.2rem;
+    font-size: 3.5rem;
+    color: var(--main-color);
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease;
+    background: linear-gradient(135deg, rgba(21, 51, 86, 0.1), transparent);
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-inline: auto;
 }
 
 .service-box h3 {
-    font-size: 2.2rem;
+    font-size: 2rem;
     color: var(--helping-color);
     margin-bottom: 1.1rem;
     font-family: var(--font-family-1);
+    font-weight: 700;
 }
 
 
 .service-box p {
-    font-size: 1.2rem;
-    color: var(--text-color);
-    margin-bottom: 1.2rem;
+    font-size: 1.3rem;
+    color: var(--grey-color);
+    margin-bottom: 2rem;
+    line-height: 1.6;
 }
 
 .service-box .service-btn {
-    font-size: 1.3rem;
-    color: var(--helping-color);
+    font-size: 1.4rem;
+    color: var(--primary-color);
     letter-spacing: normal;
+    font-weight: 600;
+    justify-content: center;
 }
 
 .service-box .service-btn i {
-    font-size: 2.2rem;
-    padding: 8px;
+    font-size: 1.8rem;
+    padding-left: 8px;
+    transition: transform 0.3s ease;
 }
 
 @media (hover:hover) {
     .service-box .service-btn:hover {
+        color: var(--main-color);
+    }
+    .service-box:hover .service-icon {
+        transform: scale(1.1) rotate(5deg);
         color: var(--primary-color);
+        background: linear-gradient(135deg, rgba(0, 0, 255, 0.1), transparent);
+    }
+    .service-box:hover .service-btn i {
+        transform: translateX(5px);
     }
 }
 
@@ -558,17 +596,25 @@ nav .social-media-icons a {
     min-height: 25rem;
     padding: 3rem;
     border-right: 1px solid var(--grey-color);
+    border-bottom: 1px solid var(--grey-color);
     background-color: var(--white);
     cursor: pointer;
-}
-
-.shoes-card:last-child {
-    border: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 1;
 }
 
 @media (hover:hover) {
+    .shoes-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        z-index: 2;
+        border-color: transparent;
+        border-radius: 12px;
+    }
+    
     .shoes-card:hover>img {
-        transform: scale(1.05);
+        transform: scale(1.1) translateY(-5px);
     }
 }
 
@@ -576,27 +622,32 @@ nav .social-media-icons a {
     height: 15rem;
     max-width: 100%;
     transform: scale(1);
-    transition: all .3s linear;
+    transition: transform 0.5s ease;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
 }
 
 
 .shoes-card h3 {
     color: var(--helping-color);
-    margin-block: 1rem;
+    margin-block: 1.5rem 0.5rem;
     font-size: 1.8rem;
+    font-weight: 600;
 }
 
 .shoes-card h4 {
     color: var(--primary-color);
     font-size: 1.9rem;
+    font-weight: 700;
 }
 
 .shoes-card h4 span {
-    color: var(--text-color);
-    padding-left: .4rem;
-    font-size: 1.5rem;
+    color: #999;
+    padding-left: .8rem;
+    font-size: 1.4rem;
     text-decoration: line-through;
-    text-decoration-thickness: 2px;
+    text-decoration-thickness: 1.5px;
+    font-weight: 400;
 }
 
 /**********************************************************
@@ -610,63 +661,92 @@ nav .social-media-icons a {
     display: grid;
     grid-template-columns: 25% 25% 50%;
     grid-template-rows: 35rem;
-    border-top: 1px solid var(--grey-color);
-    border-bottom: 1px solid var(--grey-color);
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #f9f9fb;
+    border: none;
 }
 
 .three-banner {
     padding: 3rem 0 3rem 3rem;
     background-color: var(--white);
     color: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
 .three-banner-1,
 .three-banner-3 {
-    background-image: linear-gradient(rgba(0, 0, 255, 0.539), rgba(0, 0, 0, 0.63)), url("/assets/images/gallery-1.jpg");
+    background-image: linear-gradient(135deg, rgba(21,51,86,0.8), rgba(102,126,234,0.6)), url("/assets/images/gallery-1.jpg");
     background-size: cover;
     background-position: center;
+    transition: transform 0.4s ease;
+}
+
+@media (hover:hover) {
+    .three-banner:hover {
+        transform: scale(1.02);
+    }
 }
 
 .three-banner-1 h2 {
-    font-size: 4rem;
-    letter-spacing: 1.2px;
+    font-size: 3.5rem;
+    letter-spacing: 1px;
     line-height: 1.2;
     margin-bottom: 1.4rem;
+    font-weight: 700;
 }
 
 .three-banner-1 h4 {
     font-weight: 400;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     margin-bottom: 2rem;
+    opacity: 0.9;
 }
 
 .three-banner-2 img {
     height: 14rem;
+    transition: transform 0.4s ease;
+}
+
+@media (hover:hover) {
+    .three-banner-2:hover img {
+        transform: scale(1.1) rotate(5deg);
+    }
 }
 
 .three-banner-2 h3 {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--helping-color);
 }
 
 .three-banner-2 h4 {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    color: var(--primary-color);
 }
 
 .three-banner-2 h4 span {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+    color: var(--grey-color);
+    text-decoration: line-through;
+    padding-left: 5px;
 }
 
 .three-banner-3 {
-    background-image: linear-gradient(to right, rgb(0, 0, 0), rgba(0, 26, 255, 0.395)), url("/assets/images/girl-music-1.jpg");
+    background-image: linear-gradient(to right, rgba(0,0,0,0.8), rgba(21,51,86,0.4)), url("/assets/images/girl-music-1.jpg");
 }
 
 .three-banner-3 h1 {
     width: 80%;
     max-width: 30rem;
     color: var(--white);
-    font-size: 5rem;
+    font-size: 4.5rem;
     margin-bottom: 2rem;
     line-height: 1.2;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 /**********************************************************
@@ -678,22 +758,39 @@ nav .social-media-icons a {
    Biggest Sale Section Start
 **********************************************************/
 #biggest-sale-section {
-    padding: 5rem 5%;
-    background-color: rgb(238, 238, 238);
+    padding: 6rem 5% 4rem;
+    background-color: var(--white);
     text-align: center;
 }
 
 #biggest-sale-section h1 {
     color: var(--helping-color);
-    font-size: 3.5rem;
-    letter-spacing: 1px;
+    font-size: 3.8rem;
+    letter-spacing: 0.5px;
     margin-bottom: 1rem;
+    font-weight: 800;
+    position: relative;
+    display: inline-block;
+}
+
+#biggest-sale-section h1::after {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 4px;
+    background: var(--primary-color);
+    bottom: -10px;
+    left: 25%;
+    border-radius: 2px;
 }
 
 #biggest-sale-section p {
-    font-size: 1.3rem;
-    margin-bottom: 2rem;
-    color: var(--text-color);
+    font-size: 1.4rem;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+    color: var(--grey-color);
+    max-width: 600px;
+    margin-inline: auto;
 }
 
 /**********************************************************
@@ -711,6 +808,7 @@ nav .social-media-icons a {
     background-position: center;
     cursor: pointer;
     position: relative;
+    overflow: hidden;
 }
 
 @media (hover:hover) {
@@ -721,11 +819,22 @@ nav .social-media-icons a {
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: linear-gradient(rgba(0, 0, 0, 0.317), rgba(0, 0, 0, 0.322));
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+        transition: all 0.4s ease;
     }
 
     .gallery-box:hover::before {
-        background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
+        background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
+    }
+    
+    .gallery-box {
+        transition: transform 0.5s ease;
+    }
+    
+    .gallery-box:hover {
+        z-index: 10;
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 }
 
@@ -768,6 +877,9 @@ nav .social-media-icons a {
 #brands-section {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
+    background-color: var(--white);
+    padding: 2rem 5%;
+    gap: 1rem;
 }
 
 .brand-box {
@@ -775,26 +887,32 @@ nav .social-media-icons a {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid var(--grey-color);
-    border-top: 1px solid var(--grey-color);
+    background: #fff;
     cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.03);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
 }
-
-#brands-section .brand-box:nth-child(6),
-#brands-section .brand-box:last-child {
-    border-right: none;
-}
-
 
 .brand-box img {
-    height: 10rem;
+    height: 8rem;
+    max-width: 80%;
+    object-fit: contain;
     transform: scale(1);
-    transition: all .3s linear;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: grayscale(100%) opacity(0.6);
 }
 
 @media (hover:hover) {
+    .brand-box:hover {
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        border-color: rgba(0,0,255,0.1);
+        transform: translateY(-5px);
+    }
     .brand-box:hover img {
-        transform: scale(1.08);
+        transform: scale(1.15);
+        filter: grayscale(0%) opacity(1);
     }
 }
 
