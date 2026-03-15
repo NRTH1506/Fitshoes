@@ -18,7 +18,7 @@ export default function ShopPage() {
   useEffect(() => {
     document.title = `${t('shop.title')} — FitShoes`;
     fetchProducts()
-      .then((res) => setProducts(res.data || []))
+      .then((res) => setProducts(res.data?.data || []))
       .catch(() => setError(t('shop.error')))
       .finally(() => setLoading(false));
   }, []);

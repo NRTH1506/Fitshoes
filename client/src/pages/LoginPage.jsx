@@ -39,7 +39,12 @@ export default function LoginPage() {
         callback: async (response) => {
           try {
             const res = await loginGoogle(response.credential);
-            if (res.data?.user) { login(res.data.user); navigate('/'); }
+            if (res.data?.needOtp) {
+              navigate('/verify-otp', { state: { email: res.data.email, from: 'login' } });
+            } else if (res.data?.user) {
+              login(res.data.user);
+              navigate('/');
+            }
           } catch { setError('Google login failed'); }
         },
       });

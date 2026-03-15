@@ -10,7 +10,7 @@ export default function HomePage() {
 
   useEffect(() => {
     document.title = 'FitShoes — ' + t('hero.subtitle');
-    fetchProducts().then((res) => setFeatured((res.data || []).slice(0, 8))).catch(() => {});
+    fetchProducts().then((res) => setFeatured((res.data?.data || []).slice(0, 8))).catch(() => {});
   }, []);
 
   const services = [

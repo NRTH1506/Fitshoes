@@ -20,7 +20,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     setLoading(true);
     fetchProducts().then((res) => {
-      const list = res.data || [];
+      const list = res.data?.data || [];
       setAllProducts(list);
       const found = list.find((p) => String(p.id) === id || String(p._id) === id);
       setProduct(found || null);
