@@ -335,27 +335,18 @@ app.post('/api/login-google', async (req, res) => {
         console.log('Google login:', lastGoogleLogin);
         logLoginAttempt(user.email, true, req.ip, 'google');
 
-        // Generate OTP and send email
-        const otpCode = String(Math.floor(100000 + Math.random() * 900000));
-        const otpExpiry = new Date(Date.now() + 1000 * 60 * 10);
-        await Otp.create({ email: user.email, code: otpCode, expiresAt: otpExpiry });
-
-        if (mailTransporter) {
-            try {
-                await mailTransporter.sendMail({
-                    from: GMAIL_USER,
-                    to: user.email,
-                    subject: 'Your verification code',
-                    text: `Your verification code is ${otpCode}. It will expire in 10 minutes.`
-                });
-                console.log(`Sent OTP to ${user.email}`);
-            } catch (e) {
-                console.error('Failed to send OTP email', e && e.message);
-            }
-        }
-
-        // Tell client that OTP was sent and require verification step
-        return res.json({ success: true, needOtp: true, email: user.email });
+        // Return user data directly, skipping OTP
+        return res.json({ 
+            success: true, 
+            user: { 
+                _id: user._id, 
+                name: user.name, 
+                email: user.email, 
+                phone: user.phone || '',
+                gender: user.gender || '',
+                address: user.address || ''
+            } 
+        });
     } catch (err) {
         console.error('Error in /api/login-google', err);
         return res.status(500).json({ success: false, message: 'Lỗi server' });
