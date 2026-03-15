@@ -294,6 +294,7 @@ nav .social-media-icons a {
 **********************************************************/
 #hero-text {
     min-height: 90vh;
+    padding-top: 100px;
     position: relative;
     z-index: 10;
 }

@@ -11,8 +11,10 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const totalItems = cart.reduce((s, i) => s + i.qty, 0);
 
+  const isHome = window.location.pathname === '/';
+
   return (
-    <nav className="d-flex justify-between align-center padding-inline">
+    <nav className="d-flex justify-between align-center padding-inline" style={isHome ? { position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 100 } : {}}>
       <Link to="/" className="logo-box d-flex align-center">
         <h2>FitShoes</h2>
       </Link>
