@@ -220,6 +220,36 @@ nav {
     transition: all 0.3s ease;
 }
 
+/* Dark Navbar Theme (for pages other than Home) */
+.nav-dark .logo-box h2 {
+    color: var(--base);
+    text-shadow: none;
+}
+
+.nav-dark .nav-links ul li a {
+    color: var(--base);
+    text-shadow: none;
+}
+
+.nav-dark .login-btn {
+    color: var(--base);
+    border-color: rgba(21, 51, 86, 0.3);
+    background: transparent;
+}
+
+.nav-dark .login-btn:hover {
+    background: rgba(21, 51, 86, 0.05);
+}
+
+.nav-dark button[title] {
+    color: var(--base) !important;
+    border-color: rgba(21, 51, 86, 0.3) !important;
+}
+
+.nav-dark .mobile-toggle-btn {
+    color: var(--base);
+}
+
 /* Let the nav links naturally flow in the flex container */
 .nav-links {
     flex: 1;

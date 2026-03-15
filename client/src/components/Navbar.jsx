@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,12 +9,13 @@ export default function Navbar() {
   const { cart } = useCart();
   const { t, lang, setLang } = useLanguage();
   const [open, setOpen] = useState(false);
+  const location = useLocation();
   const totalItems = cart.reduce((s, i) => s + i.qty, 0);
 
-  const isHome = window.location.pathname === '/';
+  const isHome = location.pathname === '/';
 
   return (
-    <nav className="d-flex justify-between align-center padding-inline" style={isHome ? { position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 100 } : {}}>
+    <nav className={`d-flex justify-between align-center padding-inline ${!isHome ? 'nav-dark' : ''}`} style={isHome ? { position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 100 } : {}}>
       <Link to="/" className="logo-box d-flex align-center">
         <h2>FitShoes</h2>
       </Link>
