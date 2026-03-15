@@ -74,7 +74,11 @@ const FE_ORIGINS = (process.env.FE_ORIGINS || 'http://localhost:5173,http://loca
 const corsOptions = {
     origin: function(origin, callback){
         if(!origin) return callback(null, true);
+        // Whitelist exact matches
         if(FE_ORIGINS.indexOf(origin) !== -1) return callback(null, true);
+        // Allow Vercel preview deployments
+        if(origin.endsWith('.vercel.app')) return callback(null, true);
+        
         return callback(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
