@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { resolveImagePath } from '../utils/images';
 
 const serviceData = {
   'free-shipping': {
@@ -59,7 +60,7 @@ export default function ServiceDetailPage() {
     <section style={{ padding: '4rem 5%' }}>
       <div className="service-detail-grid">
         <div style={{ borderRadius: '1rem', overflow: 'hidden' }}>
-          <img src={svc.img} alt={title} style={{ width: '100%', height: 'auto' }} />
+          <img src={resolveImagePath(svc.img)} alt={title} style={{ width: '100%', height: 'auto' }} />
         </div>
         <div>
           <h2 style={{ fontSize: '2.8rem', color: 'var(--helping-color)', marginBottom: '1rem' }}>{title}</h2>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { fetchProducts, addProduct, deleteProduct } from '../services/api';
+import { resolveImagePath } from '../utils/images';
 
 export default function AdminPage() {
   const { t } = useLanguage();
@@ -68,7 +69,7 @@ export default function AdminPage() {
               const img = (p.images && p.images.length) ? p.images[0] : '/assets/images/shoes-1.png';
               return (
                 <div key={p._id || p.id} style={{ border: '1px solid #eee', padding: '.8rem', borderRadius: '.6rem', textAlign: 'center' }}>
-                  <img src={img} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '.4rem' }} alt="" />
+                  <img src={resolveImagePath(img)} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '.4rem' }} alt="" />
                   <div style={{ fontWeight: 600, marginTop: '.5rem', fontSize: '1.3rem' }}>{p.title_vi || p.title}</div>
                   {p.brand && <div style={{ color: '#666', fontSize: '1.1rem' }}>{t('admin.brand')}: {p.brand}</div>}
                   <button onClick={() => handleDelete(p._id || p.id)} style={{ marginTop: '.5rem', background: '#b00', color: '#fff', border: 'none', padding: '.5rem 1rem', borderRadius: '.4rem', cursor: 'pointer', fontSize: '1.2rem' }}>{t('admin.delete')}</button>

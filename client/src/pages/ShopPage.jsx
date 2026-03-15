@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchProducts } from '../services/api';
 import { formatPrice } from '../utils/formatPrice';
+import { resolveImagePath } from '../utils/images';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { showToast } from '../utils/toast';
@@ -66,7 +67,7 @@ export default function ShopPage() {
       ) : (
         <div className="d-grid grid-4-columns" style={{ gap: '0' }}>
           {filtered.map((p) => {
-            const img = (Array.isArray(p.images) && p.images.length) ? p.images[0] : '';
+            const img = resolveImagePath((Array.isArray(p.images) && p.images.length) ? p.images[0] : '');
             return (
               <div className="shoes-card d-flex flex-d-col align-center justify-center" key={p.id || p._id}>
                 <Link to={`/product/${p.id || p._id}`}><img src={img} alt={p.title_vi} /></Link>

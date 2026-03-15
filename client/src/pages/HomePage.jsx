@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchProducts } from '../services/api';
 import { formatPrice } from '../utils/formatPrice';
+import { resolveImagePath } from '../utils/images';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function HomePage() {
@@ -56,7 +57,7 @@ export default function HomePage() {
           <div id="shoes-cards-section" className="d-grid grid-4-columns section-shadow">
             {featured.map((p) => (
               <Link to={`/product/${p.id || p._id}`} key={p.id || p._id} className="shoes-card d-flex flex-d-col align-center justify-center" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <img src={(Array.isArray(p.images) && p.images.length) ? p.images[0] : ''} alt={p.title_vi} />
+                <img src={resolveImagePath((Array.isArray(p.images) && p.images.length) ? p.images[0] : '')} alt={p.title_vi} />
                 <h3>{p.title_vi}</h3>
                 <h4>{formatPrice(p.price, p.currency)} {p.oldPrice && <span>{formatPrice(p.oldPrice, p.currency)}</span>}</h4>
               </Link>

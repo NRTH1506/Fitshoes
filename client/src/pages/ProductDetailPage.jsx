@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchProducts } from '../services/api';
 import { formatPrice } from '../utils/formatPrice';
+import { resolveImagePath } from '../utils/images';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { showToast } from '../utils/toast';
@@ -25,7 +26,7 @@ export default function ProductDetailPage() {
       const found = list.find((p) => String(p.id) === id || String(p._id) === id);
       setProduct(found || null);
       if (found) {
-        setMainImg((found.images && found.images.length) ? found.images[0] : '');
+        setMainImg(resolveImagePath((found.images && found.images.length) ? found.images[0] : ''));
         document.title = `${found.title_vi} — FitShoes`;
       }
     }).catch(() => {}).finally(() => setLoading(false));
@@ -58,11 +59,14 @@ export default function ProductDetailPage() {
             <img id="main-product-img" src={mainImg} alt={product.title_vi} style={{ width: '100%', height: 'auto' }} />
           </div>
           <div className="gallery-thumbs-row">
-            {images.map((src, i) => (
-              <img key={i} src={src} alt={`${product.title_vi} - ${i + 1}`}
-                onClick={() => setMainImg(src)}
-                style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '.5rem', cursor: 'pointer', border: mainImg === src ? '2px solid #667eea' : '2px solid transparent' }} />
-            ))}
+            {images.map((src, i) => {
+              const rSrc = resolveImagePath(src);
+              return (
+                <img key={i} src={rSrc} alt={`${product.title_vi} - ${i + 1}`}
+                  onClick={() => setMainImg(rSrc)}
+                  style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '.5rem', cursor: 'pointer', border: mainImg === rSrc ? '2px solid #667eea' : '2px solid transparent' }} />
+              );
+            })}
           </div>
         </div>
 
@@ -122,7 +126,7 @@ export default function ProductDetailPage() {
           <div className="d-grid grid-4-columns" style={{ gap: '0' }}>
             {related.map((p) => (
               <Link to={`/product/${p.id || p._id}`} key={p.id || p._id} className="shoes-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <img src={(Array.isArray(p.images) && p.images.length) ? p.images[0] : ''} alt={p.title_vi} />
+                <img src={resolveImagePath((Array.isArray(p.images) && p.images.length) ? p.images[0] : '')} alt={p.title_vi} />
                 <h3>{p.title_vi}</h3>
                 <h4 className="product-price">{formatPrice(p.price, p.currency)}</h4>
               </Link>
