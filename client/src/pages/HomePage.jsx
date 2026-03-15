@@ -78,7 +78,7 @@ export default function HomePage() {
       <section>
         <div id="biggest-sale-section"><h1>{t('home.brands')}</h1></div>
         <div id="brands-section">
-          {['logo-1','logo-2','logo-3','logo-4','logo-5','logo-6','logo-7','logo-8','logo-1','logo-2','logo-3','logo-4'].map((n, i) => (
+          {['c-1','c-2','c-3','c-4','c-5','c-6','c-7','c-1','c-2','c-3','c-4','c-5'].map((n, i) => (
             <div className="brand-box" key={i}><img src={`/assets/images/${n}.png`} alt="brand" /></div>
           ))}
         </div>
