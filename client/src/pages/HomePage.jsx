@@ -25,7 +25,6 @@ export default function HomePage() {
       {/* Hero */}
       <header>
         <div id="hero-text" className="d-flex flex-d-col justify-center padding-inline">
-          <h2>{t('hero.badge')}</h2>
           <h1>{t('hero.title')}</h1>
           <h3>{t('hero.subtitle')}</h3>
           <div style={{ display: 'flex', gap: '1.5rem', marginTop: '2rem', flexWrap: 'wrap' }}>

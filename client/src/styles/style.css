@@ -169,6 +169,22 @@ header {
 
 
 /**********************************************************
+  Top Promo Bar
+**********************************************************/
+.top-promo-bar {
+    width: 100%;
+    background-color: var(--main-color);
+    color: var(--white);
+    text-align: center;
+    padding: 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    z-index: 200;
+    position: relative;
+}
+
+/**********************************************************
   Nav Start
 **********************************************************/
 nav {
@@ -196,7 +212,7 @@ nav {
     font-weight: 700;
     margin-left: 1rem;
     letter-spacing: 1.2px;
-    color: #00E5FF;
+    color: var(--white);
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
@@ -209,7 +225,7 @@ nav {
 }
 
 .nav-links ul li a {
-    color: #00E5FF; /* Bright cyan for better visibility */
+    color: var(--white);
     font-size: 1.35rem;
     letter-spacing: .08rem;
     transform: scale(1);
@@ -299,24 +315,6 @@ nav .social-media-icons a {
     padding-top: 100px;
     position: relative;
     z-index: 10;
-}
-
-#hero-text h2 {
-    font-size: 1.2rem;
-    letter-spacing: 1.1px;
-    margin-top: 2rem;
-    margin-bottom: 3rem;
-    font-weight: 500;
-    color: var(--white);
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 0.6rem 1.2rem;
-    border-radius: 2rem; /* Pill shape */
-    transition: all .3s linear;
-    cursor: default;
-    display: inline-block;
 }
 
 #hero-text h1 {
