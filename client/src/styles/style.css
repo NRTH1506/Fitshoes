@@ -193,10 +193,11 @@ nav {
 
 .logo-box h2 {
     font-size: 2.2rem;
-    font-weight: 500;
+    font-weight: 700;
     margin-left: 1rem;
     letter-spacing: 1.2px;
     color: var(--white);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 
@@ -209,10 +210,11 @@ nav {
 
 .nav-links ul li a {
     color: var(--white);
-    font-size: 1.29rem;
+    font-size: 1.35rem;
     letter-spacing: .08rem;
     transform: scale(1);
-    font-weight: 500;
+    font-weight: 600;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 /* Let the nav links naturally flow in the flex container */
