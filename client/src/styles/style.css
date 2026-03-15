@@ -168,33 +168,19 @@ header {
 }
 
 
-/**********************************************************
-  Top Promo Bar
-**********************************************************/
-.top-promo-bar {
-    width: 100%;
-    background-color: var(--main-color);
-    color: var(--white);
-    text-align: center;
-    padding: 0.6rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    letter-spacing: 1px;
-    z-index: 200;
-    position: relative;
-}
 
 /**********************************************************
   Nav Start
 **********************************************************/
 nav {
-    padding-block: 1.5rem;
+    padding-block: 1.2rem;
     position: relative;
-    /* Glassmorphism Navigation */
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /* Sleek Glassmorphism Navigation */
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     z-index: 100;
 }
 
@@ -226,11 +212,12 @@ nav {
 
 .nav-links ul li a {
     color: var(--white);
-    font-size: 1.35rem;
-    letter-spacing: .08rem;
-    transform: scale(1);
-    font-weight: 600;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    font-size: 1.15rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
 }
 
 /* Let the nav links naturally flow in the flex container */
