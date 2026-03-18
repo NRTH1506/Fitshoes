@@ -76,15 +76,16 @@ const GMAIL_USER = process.env.GMAIL_USER || '';
 const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || '';
 if (GMAIL_USER && GMAIL_APP_PASSWORD) {
     mailTransporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // Use SSL
-        pool: true,   // Reuse connections
-        connectionTimeout: 10000, // 10s timeout
+        service: 'gmail',
         auth: {
             user: GMAIL_USER,
             pass: GMAIL_APP_PASSWORD
         },
+        debug: true,    // Show SMTP traffic
+        logger: true,   // Log SMTP traffic to console
+        connectionTimeout: 15000, 
+        greetingTimeout: 15000,
+        socketTimeout: 30000,
         tls: {
             rejectUnauthorized: false
         }
