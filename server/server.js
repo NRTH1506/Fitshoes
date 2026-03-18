@@ -85,8 +85,14 @@ let lastGoogleLogin = null;
 
 // --- Email: Gmail API Setup ---
 async function sendEmailViaGmailAPI({ to, subject, text }) {
-    if (!GMAIL_CLIENT_ID || !GMAIL_CLIENT_SECRET || !GMAIL_REFRESH_TOKEN || !GMAIL_USER_EMAIL) {
-        console.warn('⚠️ [Gmail API] Credentials missing. Check Render Env Variables.');
+    const missing = [];
+    if (!GMAIL_CLIENT_ID) missing.push('GOOGLE_API_CLIENT_ID');
+    if (!GMAIL_CLIENT_SECRET) missing.push('GOOGLE_API_CLIENT_SECRET');
+    if (!GMAIL_REFRESH_TOKEN) missing.push('GOOGLE_API_REFRESH_TOKEN');
+    if (!GMAIL_USER_EMAIL) missing.push('GMAIL_USER');
+
+    if (missing.length > 0) {
+        console.warn(`⚠️ [Gmail API] Credentials missing in Render: ${missing.join(', ')}`);
         return;
     }
 
