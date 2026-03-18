@@ -16,8 +16,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const PasswordHasher = require('./PasswordHasher'); 
-const { OAuth2Client } = require('google-auth-library');
 const nodemailer = require('nodemailer');
+const resendApiKey = process.env.RESEND_API_KEY || '';
 
 // --- Import Logger Middleware ---
 const logHttpRequest = require('./middleware/httpLogger');
@@ -70,29 +70,29 @@ if (GOOGLE_CLIENT_ID) {
 // Theo dõi thông tin đăng nhập Google gần nhất (cho mục đích debug)
 let lastGoogleLogin = null;
 
-// Cấu hình Nodemailer transporter
-let mailTransporter = null;
-const GMAIL_USER = process.env.GMAIL_USER || '';
-const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || '';
-if (GMAIL_USER && GMAIL_APP_PASSWORD) {
-    mailTransporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: GMAIL_USER,
-            pass: GMAIL_APP_PASSWORD
-        },
-        debug: true,    // Show SMTP traffic
-        logger: true,   // Log SMTP traffic to console
-        connectionTimeout: 15000, 
-        greetingTimeout: 15000,
-        socketTimeout: 30000,
-        tls: {
-            rejectUnauthorized: false
-        }
-    });
-    console.log('Mail transporter configured for', GMAIL_USER);
-} else {
-    console.warn('Mail transporter not configured (GMAIL_USER/GMAIL_APP_PASSWORD missing)');
+// --- Email: Resend Setup ---
+async function sendEmailViaResend({ to, subject, text }) {
+    if (!resendApiKey) {
+        console.warn('⚠️ [Resend] API Key missing. Check Render Env Variables.');
+        return;
+    }
+    try {
+        const response = await axios.post('https://api.resend.com/emails', {
+            from: 'FitShoes <onboarding@resend.dev>',
+            to: [to],
+            subject: subject,
+            text: text
+        }, {
+            headers: {
+                'Authorization': `Bearer ${resendApiKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(`[Resend] Email Success: to=${to}, id=${response.data.id}`);
+        return response.data;
+    } catch (err) {
+        console.error(`[Resend] Error to=${to}:`, err.response?.data || err.message);
+    }
 }
 
 
@@ -249,18 +249,15 @@ app.post('/api/register', authLimiter, async (req, res) => {
             console.error('Failed to create OTP record', e && e.message);
         }
 
-        if (mailTransporter) {
-            mailTransporter.sendMail({
-                from: GMAIL_USER,
+        if (resendApiKey) {
+            sendEmailViaResend({
                 to: lowerEmail,
                 subject: '[FitShoes] Xác thực tài khoản',
                 text: `Chào ${String(name).trim()},\n\nMã xác thực của bạn là: ${otpCode}\n\nMã sẽ hết hạn trong 10 phút.\n\nTrân trọng,\nFitShoes Team`
-            }).catch(e => {
-                console.error('Background Register OTP error:', e);
             });
-            console.log(`Async Register OTP initiated for ${lowerEmail}`);
+            console.log(`Async Register OTP (Resend) initiated for ${lowerEmail}`);
         } else {
-            console.warn('Mail transporter not configured');
+            console.warn('Resend API Key missing');
         }
 
         return res.status(201).json({ success: true, message: 'Đăng ký thành công. Vui lòng kiểm tra email để xác thực.', email: lowerEmail });
@@ -298,19 +295,16 @@ app.post('/api/login', authLimiter, async (req, res) => {
             const otpExpiry = new Date(Date.now() + 1000 * 60 * 10); // 10 minutes
             await Otp.create({ email: user.email, code: otpCode, expiresAt: otpExpiry });
 
-            if (mailTransporter) {
-                // Send email asynchronously to avoid blocking the response
-                mailTransporter.sendMail({
-                    from: GMAIL_USER,
+            if (resendApiKey) {
+                // Send email asynchronously
+                sendEmailViaResend({
                     to: user.email,
                     subject: 'FitShoes - Your verification code',
                     text: `Your verification code is ${otpCode}. It will expire in 10 minutes.`
-                }).catch(e => {
-                    console.error('Background Login OTP email error:', e);
                 });
-                console.log(`Async limited OTP send initiated for ${user.email}`);
+                console.log(`Async limited OTP (Resend) initiated for ${user.email}`);
             } else {
-                console.warn('OTP created but mail transporter not configured');
+                console.warn('Resend API Key missing');
             }
         } catch (e) {
             console.error('Failed to create OTP record', e && e.message);
@@ -445,18 +439,15 @@ app.post('/api/resend-otp', async (req, res) => {
         }
 
         // Send email with new OTP
-        if (mailTransporter) {
-            mailTransporter.sendMail({
-                from: GMAIL_USER,
+        if (resendApiKey) {
+            sendEmailViaResend({
                 to: cleanEmail,
                 subject: 'FitShoes - Mã xác thực mới',
                 text: `Mã xác thực mới của bạn là: ${otpCode}\n\nMã sẽ hết hạn trong 10 phút.\n\nVui lòng không chia sẻ mã này với ai khác.`
-            }).catch(e => {
-                console.error('Resend OTP error details:', e);
             });
-            console.log(`Async resend OTP initiated for ${cleanEmail}`);
+            console.log(`Async resend OTP (Resend) initiated for ${cleanEmail}`);
         } else {
-            console.warn('Mail transporter not configured');
+            console.warn('Resend API Key missing');
             return res.status(500).json({ success: false, message: 'Hệ thống email không khả dụng' });
         }
 
