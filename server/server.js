@@ -105,7 +105,7 @@ async function sendEmailViaGmailAPI({ to, subject, text }) {
             '',
             text,
         ];
-        const message = messageParts.join('\n');
+        const message = messageParts.join('\r\n');
 
         // Encode the message to base64url
         const encodedMessage = Buffer.from(message)
