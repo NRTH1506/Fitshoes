@@ -4,7 +4,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Product = require('../models/Product');
 
 // --- 1. Gemini API setup ---
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY || process.env.apiKey;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
     console.error('⚠️ WARNING: GEMINI_API_KEY not found in environment variables');
 }
@@ -58,10 +58,10 @@ router.post('/chat', async (req, res) => {
         const dynamicSystemPrompt = `${SYSTEM_PROMPT_BASE}\n\nLive Product Inventory:\n${JSON.stringify(productInfo, null, 2)}`;
 
         // Initialize model with Dynamic System Instructions
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.0-flash-latest",
             systemInstruction: dynamicSystemPrompt
-        }, { apiVersion: 'v1' });
+        });
 
         console.log(`[Chatbot] Message from ${userId}: "${message}"`);
 
@@ -102,14 +102,14 @@ router.post('/chat', async (req, res) => {
 
     } catch (error) {
         console.error('Gemini Chatbot error:', error);
-        
+
         let errorMessage = 'Failed to process chat message';
         if (error.message && error.message.includes('API_KEY_INVALID')) {
             errorMessage = '❌ API Key Gemini không hợp lệ.';
         } else if (error.status === 429) {
             errorMessage = '⏳ Hết hạn mức request (Quota). Vui lòng thử lại sau.';
         }
-        
+
         res.status(500).json({
             success: false,
             error: errorMessage,
