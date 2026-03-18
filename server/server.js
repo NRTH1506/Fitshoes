@@ -23,7 +23,14 @@ const { OAuth2Client } = require('google-auth-library');
 const GMAIL_CLIENT_ID = process.env.GOOGLE_API_CLIENT_ID || '';
 const GMAIL_CLIENT_SECRET = process.env.GOOGLE_API_CLIENT_SECRET || '';
 const GMAIL_REFRESH_TOKEN = process.env.GOOGLE_API_REFRESH_TOKEN || '';
-const GMAIL_USER_EMAIL = process.env.GMAIL_USER || ''; // The Gmail address to send from
+const GMAIL_USER_EMAIL = process.env.GMAIL_USER || '';
+
+console.log('[Gmail API Config] Status:', {
+    clientId: !!GMAIL_CLIENT_ID,
+    clientSecret: !!GMAIL_CLIENT_SECRET,
+    refreshToken: !!GMAIL_REFRESH_TOKEN,
+    userEmail: !!GMAIL_USER_EMAIL
+});
 
 // --- Import Logger Middleware ---
 const logHttpRequest = require('./middleware/httpLogger');
