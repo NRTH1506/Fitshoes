@@ -17,7 +17,13 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const PasswordHasher = require('./PasswordHasher'); 
 const nodemailer = require('nodemailer');
-const resendApiKey = process.env.RESEND_API_KEY || '';
+const { OAuth2Client } = require('google-auth-library');
+
+// --- Google API Config for Emails ---
+const GMAIL_CLIENT_ID = process.env.GOOGLE_API_CLIENT_ID || '';
+const GMAIL_CLIENT_SECRET = process.env.GOOGLE_API_CLIENT_SECRET || '';
+const GMAIL_REFRESH_TOKEN = process.env.GOOGLE_API_REFRESH_TOKEN || '';
+const GMAIL_USER_EMAIL = process.env.GMAIL_USER || ''; // The Gmail address to send from
 
 // --- Import Logger Middleware ---
 const logHttpRequest = require('./middleware/httpLogger');
@@ -70,28 +76,59 @@ if (GOOGLE_CLIENT_ID) {
 // Theo dõi thông tin đăng nhập Google gần nhất (cho mục đích debug)
 let lastGoogleLogin = null;
 
-// --- Email: Resend Setup ---
-async function sendEmailViaResend({ to, subject, text }) {
-    if (!resendApiKey) {
-        console.warn('⚠️ [Resend] API Key missing. Check Render Env Variables.');
+// --- Email: Gmail API Setup ---
+async function sendEmailViaGmailAPI({ to, subject, text }) {
+    if (!GMAIL_CLIENT_ID || !GMAIL_CLIENT_SECRET || !GMAIL_REFRESH_TOKEN || !GMAIL_USER_EMAIL) {
+        console.warn('⚠️ [Gmail API] Credentials missing. Check Render Env Variables.');
         return;
     }
+
     try {
-        const response = await axios.post('https://api.resend.com/emails', {
-            from: 'FitShoes <onboarding@resend.dev>',
-            to: [to],
-            subject: subject,
-            text: text
-        }, {
-            headers: {
-                'Authorization': `Bearer ${resendApiKey}`,
-                'Content-Type': 'application/json'
+        const oauth2Client = new OAuth2Client(GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, 'https://developers.google.com/oauthplayground');
+        oauth2Client.setCredentials({ refresh_token: GMAIL_REFRESH_TOKEN });
+
+        const accessTokenRes = await oauth2Client.getAccessToken();
+        const accessToken = accessTokenRes.token;
+
+        if (!accessToken) {
+            throw new Error('Failed to generate Gmail API Access Token');
+        }
+
+        // Create the email in RFC 5322 format
+        const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+        const messageParts = [
+            `From: FitShoes <${GMAIL_USER_EMAIL}>`,
+            `To: ${to}`,
+            `Content-Type: text/plain; charset=utf-8`,
+            `MIME-Version: 1.0`,
+            `Subject: ${utf8Subject}`,
+            '',
+            text,
+        ];
+        const message = messageParts.join('\n');
+
+        // Encode the message to base64url
+        const encodedMessage = Buffer.from(message)
+            .toString('base64')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+
+        const response = await axios.post(
+            `https://gmail.googleapis.com/gmail/v1/users/me/messages/send`,
+            { raw: encodedMessage },
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
             }
-        });
-        console.log(`[Resend] Email Success: to=${to}, id=${response.data.id}`);
+        );
+
+        console.log(`[Gmail API] Email Success: to=${to}, id=${response.data.id}`);
         return response.data;
     } catch (err) {
-        console.error(`[Resend] Error to=${to}:`, err.response?.data || err.message);
+        console.error(`[Gmail API] Error to=${to}:`, err.response?.data || err.message);
     }
 }
 
@@ -249,15 +286,15 @@ app.post('/api/register', authLimiter, async (req, res) => {
             console.error('Failed to create OTP record', e && e.message);
         }
 
-        if (resendApiKey) {
-            sendEmailViaResend({
+        if (GMAIL_REFRESH_TOKEN) {
+            sendEmailViaGmailAPI({
                 to: lowerEmail,
                 subject: '[FitShoes] Xác thực tài khoản',
                 text: `Chào ${String(name).trim()},\n\nMã xác thực của bạn là: ${otpCode}\n\nMã sẽ hết hạn trong 10 phút.\n\nTrân trọng,\nFitShoes Team`
             });
-            console.log(`Async Register OTP (Resend) initiated for ${lowerEmail}`);
+            console.log(`Async Register OTP (Gmail API) initiated for ${lowerEmail}`);
         } else {
-            console.warn('Resend API Key missing');
+            console.warn('Gmail API credentials missing');
         }
 
         return res.status(201).json({ success: true, message: 'Đăng ký thành công. Vui lòng kiểm tra email để xác thực.', email: lowerEmail });
@@ -295,16 +332,16 @@ app.post('/api/login', authLimiter, async (req, res) => {
             const otpExpiry = new Date(Date.now() + 1000 * 60 * 10); // 10 minutes
             await Otp.create({ email: user.email, code: otpCode, expiresAt: otpExpiry });
 
-            if (resendApiKey) {
+            if (GMAIL_REFRESH_TOKEN) {
                 // Send email asynchronously
-                sendEmailViaResend({
+                sendEmailViaGmailAPI({
                     to: user.email,
                     subject: 'FitShoes - Your verification code',
                     text: `Your verification code is ${otpCode}. It will expire in 10 minutes.`
                 });
-                console.log(`Async limited OTP (Resend) initiated for ${user.email}`);
+                console.log(`Async limited OTP (Gmail API) initiated for ${user.email}`);
             } else {
-                console.warn('Resend API Key missing');
+                console.warn('Gmail API credentials missing');
             }
         } catch (e) {
             console.error('Failed to create OTP record', e && e.message);
@@ -439,15 +476,15 @@ app.post('/api/resend-otp', async (req, res) => {
         }
 
         // Send email with new OTP
-        if (resendApiKey) {
-            sendEmailViaResend({
+        if (GMAIL_REFRESH_TOKEN) {
+            sendEmailViaGmailAPI({
                 to: cleanEmail,
                 subject: 'FitShoes - Mã xác thực mới',
                 text: `Mã xác thực mới của bạn là: ${otpCode}\n\nMã sẽ hết hạn trong 10 phút.\n\nVui lòng không chia sẻ mã này với ai khác.`
             });
-            console.log(`Async resend OTP (Resend) initiated for ${cleanEmail}`);
+            console.log(`Async resend OTP (Gmail API) initiated for ${cleanEmail}`);
         } else {
-            console.warn('Resend API Key missing');
+            console.warn('Gmail API credentials missing');
             return res.status(500).json({ success: false, message: 'Hệ thống email không khả dụng' });
         }
 
