@@ -9,7 +9,12 @@ const crypto = require("crypto");
 const multer = require("multer");
 
 // Load environment variables from .env if present
-try { require('dotenv').config(); } catch (e) { /* dotenv optional */ }
+try { 
+    require('dotenv').config({ path: path.join(__dirname, '.env') }); 
+    console.log('✅ .env loaded successfully');
+} catch (e) { 
+    console.warn('⚠️ dotenv initialization failed:', e && e.message); 
+}
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
