@@ -378,38 +378,60 @@ app.post('/api/login', authLimiter, async (req, res) => {
 app.post('/api/login-google', async (req, res) => {
     try {
         const { credential } = req.body || {};
-        if (!credential) return res.status(400).json({ success: false, message: 'Missing credential' });
+        if (!credential) {
+            console.warn('[Google Login] Request body missing credential');
+            return res.status(400).json({ success: false, message: 'Missing credential' });
+        }
 
-        if (!googleClient) return res.status(500).json({ success: false, message: 'Google client not configured on server' });
+        if (!googleClient) {
+            console.error('[Google Login] googleClient not initialized! CHECK GOOGLE_CLIENT_ID in .env');
+            return res.status(500).json({ success: false, message: 'Google client not configured on server' });
+        }
 
         // Verify ID token with Google
         let payload;
         try {
+            console.log(`[Google Login] Verifying token for audience: ${GOOGLE_CLIENT_ID || 'MISSING'}`);
             const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
             payload = ticket.getPayload();
+            console.log(`[Google Login] Token verified successfully for ${payload.email}`);
         } catch (e) {
-            console.error('Google token verification failed', e && e.message);
+            console.error('[Google Login] Token verification failed:', e.message);
+            // Log full error for critical debugging
+            if (e.message?.includes('deleted_client')) {
+                console.error('[CRITICAL] The OAuth client ID used by the server is DELETED or INVALID.');
+            }
             logLoginAttempt('unknown', false, req.ip, 'google');
-            return res.status(401).json({ success: false, message: 'Invalid Google credential' });
+            return res.status(401).json({ success: false, message: 'Invalid Google credential', details: e.message });
         }
 
         const email = String(payload.email || '').trim().toLowerCase();
         const name = payload.name || payload.email || 'Google User';
 
-        if (!email) return res.status(400).json({ success: false, message: 'Google token missing email' });
+        if (!email) {
+            console.warn('[Google Login] Payload missing email');
+            return res.status(400).json({ success: false, message: 'Google token missing email' });
+        }
 
         // Find existing user or create new one
-        let user = await User.findOne({ email });
-        if (!user) {
-            const randomPassword = Math.random().toString(36).slice(2);
-            const passwordHash = await hasher.hashPassword(randomPassword);
-            user = new User({ name: String(name).trim(), email, passwordHash });
-            await user.save();
+        let user;
+        try {
+            user = await User.findOne({ email });
+            if (!user) {
+                console.log(`[Google Login] Creating new user for ${email}`);
+                const randomPassword = Math.random().toString(36).slice(2);
+                const passwordHash = await hasher.hashPassword(randomPassword);
+                user = new User({ name: String(name).trim(), email, passwordHash });
+                await user.save();
+            }
+        } catch (dbErr) {
+            console.error('[Google Login] Database operation failed:', dbErr.message);
+            throw dbErr; // Let the outer catch handle it
         }
 
         // record last login for debug
         lastGoogleLogin = { email: user.email, name: user.name, userId: String(user._id), at: new Date().toISOString() };
-        console.log('Google login:', lastGoogleLogin);
+        console.log('✅ Google login success:', lastGoogleLogin.email);
         logLoginAttempt(user.email, true, req.ip, 'google');
 
         // Return user data directly, skipping OTP
@@ -425,8 +447,8 @@ app.post('/api/login-google', async (req, res) => {
             } 
         });
     } catch (err) {
-        console.error('Error in /api/login-google', err);
-        return res.status(500).json({ success: false, message: 'Lỗi server' });
+        console.error('[Google Login Error] Fatal Exception:', err.message);
+        return res.status(500).json({ success: false, message: 'Lỗi server', details: err.message });
     }
 });
 
