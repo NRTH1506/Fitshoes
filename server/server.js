@@ -70,8 +70,8 @@ const hasher = new PasswordHasher(10); // Khởi tạo hasher
 const PORT = process.env.PORT || 8081;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/fitshoes';
 
-// Cấu hình Google Client ID
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+// Cấu hình Google Client ID (Thử cả hai tên biến môi trường cho chắc chắn)
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_API_CLIENT_ID || '';
 let googleClient = null;
 if (GOOGLE_CLIENT_ID) {
     try {
