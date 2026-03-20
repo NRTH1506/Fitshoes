@@ -47,7 +47,15 @@ export const uploadAvatar = (formData) => {
   return fetch(`${import.meta.env.VITE_API_URL || ''}/api/profile/upload`, {
     method: 'POST',
     body: formData,
-  }).then(res => res.json());
+  }).then(async (res) => {
+    const data = await res.json();
+    if (!res.ok) {
+      const error = new Error(data.message || 'Avatar upload failed');
+      error.response = { status: res.status, data };
+      throw error;
+    }
+    return data;
+  });
 };
 
 // ─── Products ─────────────────────────────────────────
@@ -89,4 +97,3 @@ export { getProducts as fetchProducts };
 export { login as loginUser };
 export { register as registerUser };
 export { getLogs as fetchLogs };
-

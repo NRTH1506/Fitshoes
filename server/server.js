@@ -9,19 +9,18 @@ const crypto = require("crypto");
 const multer = require("multer");
 
 // Load environment variables from .env if present
-try { 
-    require('dotenv').config({ path: path.join(__dirname, '.env') }); 
+try {
+    require('dotenv').config({ path: path.join(__dirname, '.env') });
     console.log('✅ .env loaded successfully');
-} catch (e) { 
-    console.warn('⚠️ dotenv initialization failed:', e && e.message); 
+} catch (e) {
+    console.warn('⚠️ dotenv initialization failed:', e && e.message);
 }
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const PasswordHasher = require('./PasswordHasher'); 
-const nodemailer = require('nodemailer');
+const PasswordHasher = require('./PasswordHasher');
 const { OAuth2Client } = require('google-auth-library');
 
 // --- Google API Config for Emails ---
@@ -29,6 +28,8 @@ const GMAIL_CLIENT_ID = process.env.GOOGLE_API_CLIENT_ID || '';
 const GMAIL_CLIENT_SECRET = process.env.GOOGLE_API_CLIENT_SECRET || '';
 const GMAIL_REFRESH_TOKEN = process.env.GOOGLE_API_REFRESH_TOKEN || '';
 const GMAIL_USER_EMAIL = process.env.GMAIL_USER || '';
+const GMAIL_USER = GMAIL_USER_EMAIL;
+const mailTransporter = null;
 
 console.log('[Gmail API Config] Status:', {
     clientId: !!GMAIL_CLIENT_ID,
@@ -55,7 +56,7 @@ const storage = multer.diskStorage({
         cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-const upload = multer({ 
+const upload = multer({
     storage,
     limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
     fileFilter: (req, file, cb) => {
@@ -155,13 +156,13 @@ async function sendEmailViaGmailAPI({ to, subject, text }) {
 const FE_ORIGINS = (process.env.FE_ORIGINS || 'http://localhost:5173,http://localhost:8081').split(',').map(s => s.trim());
 
 const corsOptions = {
-    origin: function(origin, callback){
-        if(!origin) return callback(null, true);
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
         // Whitelist exact matches
-        if(FE_ORIGINS.indexOf(origin) !== -1) return callback(null, true);
+        if (FE_ORIGINS.indexOf(origin) !== -1) return callback(null, true);
         // Allow Vercel preview deployments
-        if(origin.endsWith('.vercel.app')) return callback(null, true);
-        
+        if (origin.endsWith('.vercel.app')) return callback(null, true);
+
         return callback(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -170,6 +171,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.disable('x-powered-by');
 
 // --- Trust proxy (Render / Vercel reverse proxy) ---
 app.set('trust proxy', 1);
@@ -185,7 +187,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // --- Security middleware ---
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+    crossOriginResourcePolicy: { policy: "cross-origin" } // Cho phép load tài nguyên từ domain khác
+}));
 
 // --- Rate limiting on auth endpoints ---
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'Quá nhiều yêu cầu, vui lòng thử lại sau.' } });
@@ -196,7 +203,86 @@ app.use(logHttpRequest);
 // --- Middleware ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    setHeaders: (res) => {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+}));
+
+const ADMIN_KEY = process.env.ADMIN_KEY || 'dev-admin-key';
+
+function normalizeEmail(value) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function isValidObjectId(value) {
+    return mongoose.Types.ObjectId.isValid(String(value || ''));
+}
+
+function requireAdmin(req, res, next) {
+    if (process.env.NODE_ENV !== 'production' && ADMIN_KEY === 'dev-admin-key') {
+        return next();
+    }
+
+    const key = req.get('x-admin-key');
+    if (!key || key !== ADMIN_KEY) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    return next();
+}
+
+function normalizeImages(images) {
+    if (Array.isArray(images)) {
+        return images.map(String).map((image) => image.trim()).filter(Boolean);
+    }
+
+    if (typeof images === 'string') {
+        return images.split(',').map((image) => image.trim()).filter(Boolean);
+    }
+
+    if (images) {
+        return [String(images).trim()].filter(Boolean);
+    }
+
+    return [];
+}
+
+function buildProductPayload(body) {
+    const title = String(body?.title || body?.title_vi || '').trim();
+    const titleVi = String(body?.title_vi || body?.title || '').trim();
+    const price = Number(body?.price);
+    const oldPrice = body?.oldPrice === undefined || body?.oldPrice === null || body?.oldPrice === ''
+        ? undefined
+        : Number(body.oldPrice);
+
+    if (!title || !titleVi) {
+        return { error: 'Thiáº¿u thÃ´ng tin sáº£n pháº©m' };
+    }
+
+    if (!Number.isFinite(price) || price <= 0) {
+        return { error: 'GiÃ¡ sáº£n pháº©m khÃ´ng há»£p lá»‡' };
+    }
+
+    if (oldPrice !== undefined && (!Number.isFinite(oldPrice) || oldPrice < 0)) {
+        return { error: 'GiÃ¡ cá»§ khÃ´ng há»£p lá»‡' };
+    }
+
+    return {
+        payload: {
+            title,
+            title_vi: titleVi,
+            price,
+            oldPrice,
+            currency: String(body?.currency || 'VND').trim() || 'VND',
+            brand: String(body?.brand || '').trim(),
+            description_vi: String(body?.description_vi || '').trim(),
+            images: normalizeImages(body?.images),
+            gender: ['male', 'female', 'unisex'].includes(body?.gender) ? body.gender : 'unisex'
+        }
+    };
+}
 
 // --- Mongoose Schema & Model ---
 const userSchema = new mongoose.Schema({
@@ -231,7 +317,7 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: { type: String, default: "ZALOPAY" },   // ZALOPAY, COD, VNPAY
     paymentChannel: { type: Number, default: 38 }, // 36/37/38/39/41
     app_trans_id: { type: String, required: true },
-    status: { 
+    status: {
         type: String,
         enum: ["PENDING", "SUCCESS", "FAILED"],
         default: "PENDING"
@@ -270,13 +356,13 @@ app.use((req, res, next) => {
 // --- API: Đăng ký tài khoản ---
 app.post('/api/register', authLimiter, async (req, res) => {
     try {
-        if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
+        if (!dbConnected) return res.status(503).json({ success: false, message: 'Database unavailable' });
         const { name, email, password, phone, gender, address } = req.body || {};
         if (!name || !email || !password) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin' });
         }
 
-        const lowerEmail = String(email).trim().toLowerCase();
+        const lowerEmail = normalizeEmail(email);
         const existingEmail = await User.findOne({ email: lowerEmail });
         if (existingEmail) {
             return res.status(409).json({ success: false, message: 'Email đã tồn tại' });
@@ -297,7 +383,7 @@ app.post('/api/register', authLimiter, async (req, res) => {
         // Generate OTP and send email
         const otpCode = String(Math.floor(100000 + Math.random() * 900000));
         const otpExpiry = new Date(Date.now() + 1000 * 60 * 10); // 10 minutes
-        
+
         try {
             await Otp.create({ email: lowerEmail, code: otpCode, expiresAt: otpExpiry });
         } catch (e) {
@@ -326,23 +412,27 @@ app.post('/api/register', authLimiter, async (req, res) => {
 // --- API: Đăng nhập (Yêu cầu OTP) ---
 app.post('/api/login', authLimiter, async (req, res) => {
     try {
-        if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
+        if (!dbConnected) return res.status(503).json({ success: false, message: 'Database unavailable' });
         const { email, password } = req.body || {};
-        
-        const user = await User.findOne({ email: String(email).trim().toLowerCase() });
+        const normalizedEmail = normalizeEmail(email);
+        if (!normalizedEmail || !password) {
+            return res.status(400).json({ success: false, message: 'Thiáº¿u thÃ´ng tin' });
+        }
+
+        const user = await User.findOne({ email: normalizedEmail });
         if (!user) {
-            logLoginAttempt(email, false, req.ip, 'password');
+            logLoginAttempt(normalizedEmail, false, req.ip, 'password');
             return res.status(401).json({ success: false, message: 'Email hoặc mật khẩu không đúng' });
         }
 
         const ok = await hasher.verifyPassword(password, user.passwordHash);
         if (!ok) {
-            logLoginAttempt(email, false, req.ip, 'password');
+            logLoginAttempt(normalizedEmail, false, req.ip, 'password');
             return res.status(401).json({ success: false, message: 'Email hoặc mật khẩu không đúng' });
         }
 
         // Log successful login attempt
-        logLoginAttempt(email, true, req.ip, 'password');
+        logLoginAttempt(normalizedEmail, true, req.ip, 'password');
 
         // THÊM: Logic tạo và gửi OTP (từ File 2)
         try {
@@ -405,7 +495,7 @@ app.post('/api/login-google', async (req, res) => {
             return res.status(401).json({ success: false, message: 'Invalid Google credential', details: e.message });
         }
 
-        const email = String(payload.email || '').trim().toLowerCase();
+        const email = normalizeEmail(payload.email);
         const name = payload.name || payload.email || 'Google User';
 
         if (!email) {
@@ -435,16 +525,16 @@ app.post('/api/login-google', async (req, res) => {
         logLoginAttempt(user.email, true, req.ip, 'google');
 
         // Return user data directly, skipping OTP
-        return res.json({ 
-            success: true, 
-            user: { 
-                _id: user._id, 
-                name: user.name, 
-                email: user.email, 
+        return res.json({
+            success: true,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
                 phone: user.phone || '',
                 gender: user.gender || '',
                 address: user.address || ''
-            } 
+            }
         });
     } catch (err) {
         console.error('[Google Login Error] Fatal Exception:', err.message);
@@ -458,30 +548,36 @@ app.post('/api/verify-otp', authLimiter, async (req, res) => {
         const { email, code } = req.body || {};
         if (!email || !code) return res.status(400).json({ success: false, message: 'Missing email or code' });
 
-        const record = await Otp.findOne({ email: String(email).trim().toLowerCase(), code: String(code).trim() });
-        if (!record) return res.status(400).json({ success: false, message: 'Invalid code' });
+        const normalizedEmail = normalizeEmail(email);
+        const cleanCode = String(code).trim();
+        const record = await Otp.findOne({ email: normalizedEmail, code: cleanCode });
+        if (!record) {
+            logOtpVerification(normalizedEmail, false);
+            return res.status(400).json({ success: false, message: 'Invalid code' });
+        }
         if (record.expiresAt < new Date()) {
             await Otp.deleteOne({ _id: record._id });
+            logOtpVerification(normalizedEmail, false);
             return res.status(400).json({ success: false, message: 'Code expired' });
         }
 
         // OTP valid -> delete it and return user info
         await Otp.deleteOne({ _id: record._id });
-        const user = await User.findOne({ email: String(email).trim().toLowerCase() });
+        const user = await User.findOne({ email: normalizedEmail });
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         // Log successful OTP verification
-        logOtpVerification(email, true);
-        return res.json({ 
-            success: true, 
-            user: { 
-                _id: user._id, 
-                name: user.name, 
-                email: user.email, 
+        logOtpVerification(normalizedEmail, true);
+        return res.json({
+            success: true,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
                 phone: user.phone || '',
                 gender: user.gender || '',
                 address: user.address || ''
-            } 
+            }
         });
     } catch (err) {
         console.error('Error in /api/verify-otp', err);
@@ -495,8 +591,8 @@ app.post('/api/resend-otp', async (req, res) => {
         const { email } = req.body || {};
         if (!email) return res.status(400).json({ success: false, message: 'Missing email' });
 
-        const cleanEmail = String(email).trim().toLowerCase();
-        
+        const cleanEmail = normalizeEmail(email);
+
         // Check if user exists
         const user = await User.findOne({ email: cleanEmail });
         if (!user) return res.status(400).json({ success: false, message: 'Người dùng không tồn tại' });
@@ -507,7 +603,7 @@ app.post('/api/resend-otp', async (req, res) => {
         // Generate new OTP
         const otpCode = String(Math.floor(100000 + Math.random() * 900000));
         const otpExpiry = new Date(Date.now() + 1000 * 60 * 10); // 10 minutes
-        
+
         try {
             await Otp.create({ email: cleanEmail, code: otpCode, expiresAt: otpExpiry });
         } catch (e) {
@@ -539,7 +635,10 @@ app.post('/api/resend-otp', async (req, res) => {
 // --- API: Lấy thông tin user theo id ---
 app.get('/api/users/:id', async (req, res) => {
     try {
-        if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
+        if (!dbConnected) return res.status(503).json({ success: false, message: 'Database unavailable' });
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ success: false, message: 'Id không hợp lệ' });
+        }
         // Tìm user theo ObjectId
         try {
             const user = await User.findById(req.params.id).select('name email');
@@ -555,18 +654,23 @@ app.get('/api/users/:id', async (req, res) => {
 });
 
 // --- API: Thêm sản phẩm ---
-app.post('/api/products/add', async (req, res) => {
+app.post('/api/products/add', requireAdmin, async (req, res) => {
     try {
-        if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
+        if (!dbConnected) return res.status(503).json({ success: false, message: 'Database unavailable' });
         // Sử dụng các trường chi tiết từ File 2
+        const { payload, error } = buildProductPayload(req.body);
         const { title, title_vi, price, oldPrice, currency, brand, description_vi, images, gender } = req.body || {};
-        
+
         // Yêu cầu title_vi và price
-        if (!title_vi || !price) {
+        if (error) {
+            return res.status(400).json({ success: false, message: error });
+        }
+
+        if (!payload && (!title_vi || !price)) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin sản phẩm' });
         }
 
-        const product = new Product({
+        const product = new Product(payload || {
             title: title ? String(title).trim() : String(title_vi).trim(),
             title_vi: String(title_vi).trim(),
             price: Number(price),
@@ -575,7 +679,7 @@ app.post('/api/products/add', async (req, res) => {
             brand: String(brand || '').trim(),
             description_vi: String(description_vi || ''),
             images: Array.isArray(images) ? images.map(String) : (images ? [String(images)] : []),
-            gender: ['male','female','unisex'].includes(gender) ? gender : 'unisex'
+            gender: ['male', 'female', 'unisex'].includes(gender) ? gender : 'unisex'
         });
 
         await product.save();
@@ -593,11 +697,11 @@ app.post('/api/products/add', async (req, res) => {
 });
 
 // --- Helper: load static products fallback ---
-function loadStaticProducts(){
-    try{
+function loadStaticProducts() {
+    try {
         const raw = fs.readFileSync(path.join(__dirname, 'static-products.json'), 'utf8');
         return JSON.parse(raw);
-    }catch(e){
+    } catch (e) {
         console.warn('Không thể load static-products.json', e && e.message);
         return [];
     }
@@ -608,7 +712,7 @@ app.get('/api/products', async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
         if (products && products.length) return res.json({ success: true, data: products });
-        
+
         // fallback to static list when DB empty
         const staticProducts = loadStaticProducts();
         return res.json({ success: true, data: staticProducts });
@@ -623,14 +727,14 @@ app.get('/api/products', async (req, res) => {
 app.get('/api/products/:id', async (req, res) => {
     try {
         // Thử tìm trong DB theo ObjectId
-        try{
+        try {
             const product = await Product.findById(req.params.id);
             if (product) return res.json({ success: true, data: product });
-        }catch(e){ /* ignore invalid ObjectId errors */ }
+        } catch (e) { /* ignore invalid ObjectId errors */ }
 
         // fallback: nếu id là số nguyên, tìm trong static-products.json theo trường id
         const idInt = parseInt(req.params.id, 10);
-        if (!isNaN(idInt)){
+        if (!isNaN(idInt)) {
             const staticProducts = loadStaticProducts();
             const p = staticProducts.find(x => Number(x.id) === idInt);
             if (p) return res.json({ success: true, data: p });
@@ -644,20 +748,29 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 // --- API: Sửa sản phẩm (Từ File 2) ---
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', requireAdmin, async (req, res) => {
     try {
-        if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
-        
+        if (!dbConnected) return res.status(503).json({ success: false, message: 'Database unavailable' });
+
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ success: false, message: 'Id sáº£n pháº©m khÃ´ng há»£p lá»‡' });
+        }
+
+        const { payload, error } = buildProductPayload(req.body);
         const { title, title_vi, price, oldPrice, currency, description_vi, images, gender } = req.body || {};
-        
-        if (!title || !title_vi || !price) {
+
+        if (error) {
+            return res.status(400).json({ success: false, message: error });
+        }
+
+        if (!payload && (!title || !title_vi || !price)) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin sản phẩm' });
         }
-        
+
         try {
             const product = await Product.findByIdAndUpdate(
                 req.params.id,
-                {
+                payload || {
                     title: String(title).trim(),
                     title_vi: String(title_vi).trim(),
                     price: Number(price),
@@ -665,17 +778,17 @@ app.put('/api/products/:id', async (req, res) => {
                     currency: String(currency || 'VND'),
                     description_vi: String(description_vi || ''),
                     images: Array.isArray(images) ? images.map(String) : (images ? [String(images)] : []),
-                    gender: ['male','female','unisex'].includes(gender) ? gender : 'unisex'
+                    gender: ['male', 'female', 'unisex'].includes(gender) ? gender : 'unisex'
                 },
                 { new: true, runValidators: true }
             );
-            
+
             if (product) {
                 logProductUpdate(req.user?.id || 'unknown', req.user?.email || 'unknown', req.params.id, product);
                 return res.json({ success: true, message: 'Cập nhật sản phẩm thành công', product });
             }
-        } catch(e) { /* continue to error handling */ }
-        
+        } catch (e) { /* continue to error handling */ }
+
         return res.status(404).json({ success: false, message: 'Sản phẩm không tồn tại' });
     } catch (err) {
         console.error(err);
@@ -684,10 +797,13 @@ app.put('/api/products/:id', async (req, res) => {
 });
 
 // --- API: Xóa sản phẩm ---
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', requireAdmin, async (req, res) => {
     try {
-        if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
-        
+        if (!dbConnected) return res.status(503).json({ success: false, message: 'Database unavailable' });
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ success: false, message: 'Id sáº£n pháº©m khÃ´ng há»£p lá»‡' });
+        }
+
         // Try to delete by ObjectId
         try {
             const product = await Product.findByIdAndDelete(req.params.id);
@@ -695,8 +811,8 @@ app.delete('/api/products/:id', async (req, res) => {
                 logProductDelete(req.user?.id || 'unknown', req.user?.email || 'unknown', req.params.id, product.title_vi || product.title);
                 return res.json({ success: true, message: 'Xóa sản phẩm thành công', product });
             }
-        } catch(e) { /* continue to error handling */ }
-        
+        } catch (e) { /* continue to error handling */ }
+
         return res.status(404).json({ success: false, message: 'Sản phẩm không tồn tại' });
     } catch (err) {
         console.error(err);
@@ -706,14 +822,18 @@ app.delete('/api/products/:id', async (req, res) => {
 
 // Debug endpoint to inspect last Google login (development only)
 app.get('/api/debug/last-google-login', (req, res) => {
+    if (process.env.NODE_ENV === 'production') return res.status(404).json({ success: false, message: 'Not found' });
     if (!lastGoogleLogin) return res.status(404).json({ success: false, message: 'No Google login recorded yet' });
     return res.json({ success: true, data: lastGoogleLogin });
 });
 
 // --- API: Get logs ---
-app.get('/api/logs', (req, res) => {
-    const logType = req.query.type;
+app.get('/api/logs', requireAdmin, (req, res) => {
+    const logType = String(req.query.type || '').trim();
     if (!logType) return res.status(400).json({ success: false, message: 'Log type required' });
+    if (logType !== path.basename(logType) || logType.includes('..')) {
+        return res.status(400).json({ success: false, message: 'Invalid log type' });
+    }
 
     const logPath = path.join(__dirname, 'logs', logType);
     if (!fs.existsSync(logPath)) {
@@ -743,10 +863,11 @@ app.get('/api/logs', (req, res) => {
 // --- API: Update user profile ---
 app.put('/api/profile', async (req, res) => {
     try {
-        if(!dbConnected) return res.status(503).json({ success:false, message: 'Database unavailable' });
-        
+        if (!dbConnected) return res.status(503).json({ success: false, message: 'Database unavailable' });
+
         const { userId, phone, gender, address, bio, name } = req.body || {};
         if (!userId) return res.status(400).json({ success: false, message: 'User ID required' });
+        if (!isValidObjectId(userId)) return res.status(400).json({ success: false, message: 'User ID invalid' });
 
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -754,14 +875,20 @@ app.put('/api/profile', async (req, res) => {
         // Update fields
         if (name !== undefined) user.name = String(name).trim();
         if (phone !== undefined) user.phone = String(phone || '').trim();
-        if (gender !== undefined) user.gender = String(gender || '').trim();
+        if (gender !== undefined) {
+            const cleanGender = String(gender || '').trim();
+            if (!['', 'male', 'female', 'other'].includes(cleanGender)) {
+                return res.status(400).json({ success: false, message: 'Gender khÃ´ng há»£p lá»‡' });
+            }
+            user.gender = cleanGender;
+        }
         if (address !== undefined) user.address = String(address || '').trim();
         if (bio !== undefined) user.bio = String(bio || '').trim();
 
         await user.save();
 
-        return res.json({ 
-            success: true, 
+        return res.json({
+            success: true,
             message: 'Profile updated successfully',
             user: {
                 _id: user._id,
@@ -794,12 +921,15 @@ app.post('/api/profile/upload', (req, res) => {
         try {
             const { userId } = req.body;
             console.log(`[Upload] Attempting avatar upload for user: ${userId}`);
-            
+
             if (!userId) {
                 console.warn('[Upload] User ID missing in request body');
                 return res.status(400).json({ success: false, message: 'User ID required' });
             }
-            
+            if (!isValidObjectId(userId)) {
+                return res.status(400).json({ success: false, message: 'User ID invalid' });
+            }
+
             if (!req.file) {
                 console.warn('[Upload] No file found in req.file. Body keys:', Object.keys(req.body));
                 return res.status(400).json({ success: false, message: 'No file uploaded' });
@@ -854,6 +984,9 @@ app.get("/api/pay/zalopay/query/:app_trans_id", async (req, res) => {
 app.get("/api/orders/user/:userId", async (req, res) => {
     try {
         const { userId } = req.params;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: "Thiáº¿u userId" });
+        }
         const orders = await Order.find({ userId }).sort({ createdAt: -1 });
         return res.json({ success: true, orders });
     } catch (err) {
@@ -874,7 +1007,7 @@ app.post("/api/pay/zalopay", async (req, res) => {
     try {
         const { amount, items, userId } = req.body;
 
-        if (!amount || !items) {
+        if (!Number.isFinite(Number(amount)) || Number(amount) <= 0 || !Array.isArray(items) || items.length === 0) {
             return res.json({ success: false, message: "Thiếu dữ liệu đơn hàng" });
         }
 
@@ -896,15 +1029,15 @@ app.post("/api/pay/zalopay", async (req, res) => {
             app_trans_id,
             app_time: Date.now(),
             item: JSON.stringify(items),
-            amount: amount,
+            amount: Number(amount),
             description: `Thanh toán đơn hàng #${app_trans_id}`,
-            
+
             // --- CẤU HÌNH SANDBOX ---
             // Bắt buộc dùng "zalopayapp" với App ID 554 để tránh lỗi hệ thống
-            bank_code: "zalopayapp", 
-            
+            bank_code: "zalopayapp",
+
             embed_data: JSON.stringify(embed_data),
-            
+
             // QUAN TRỌNG: Link này phải public ra internet (dùng Ngrok)
             // Nếu để localhost, ZaloPay sẽ KHÔNG gọi được.
             callback_url: callback_url
@@ -947,7 +1080,7 @@ app.post("/api/pay/zalopay", async (req, res) => {
         await Order.create({
             userId,
             items,
-            amount,
+            amount: Number(amount),
             paymentMethod: "ZALOPAY",
             app_trans_id,
             status: "PENDING"
@@ -971,6 +1104,9 @@ app.post("/api/zalopay/callback", async (req, res) => {
 
     try {
         const { data: dataStr, mac: reqMac } = req.body;
+        if (!dataStr || !reqMac) {
+            return res.status(400).json({ return_code: -1, return_message: "missing callback payload" });
+        }
         const mac = crypto.createHmac("sha256", ZALOPAY.key2).update(dataStr).digest("hex");
 
         if (reqMac !== mac) {
@@ -993,13 +1129,30 @@ app.post("/api/zalopay/callback", async (req, res) => {
                 console.log(`[DB] Đã update đơn hàng ${app_trans_id} thành SUCCESS`);
 
                 // 2. GỬI MAIL (Logic kiểm tra user)
-                if (mailTransporter) {
-                    let userEmail = "email_admin@example.com"; 
+                let userEmail = '';
+                if (order.userId && mongoose.Types.ObjectId.isValid(order.userId)) {
+                    const user = await User.findById(order.userId).select('email');
+                    if (user) userEmail = user.email;
+                }
+                if (userEmail && GMAIL_REFRESH_TOKEN) {
+                    sendEmailViaGmailAPI({
+                        to: userEmail,
+                        subject: `[FitShoes] Thanh toÃ¡n thÃ nh cÃ´ng #${app_trans_id}`,
+                        text: [
+                            'Cam on ban da mua hang tai FitShoes.',
+                            `Ma don: ${app_trans_id}`,
+                            `So tien: ${new Intl.NumberFormat('vi-VN').format(amount)} VND`,
+                            'Trang thai: THANH CONG'
+                        ].join('\n')
+                    });
+                }
+                if (false) {
+                    let userEmail = "email_admin@example.com";
 
                     if (order.userId && mongoose.Types.ObjectId.isValid(order.userId)) {
                         const user = await User.findById(order.userId);
                         if (user) userEmail = user.email;
-                    } 
+                    }
 
                     const mailOptions = {
                         from: GMAIL_USER,

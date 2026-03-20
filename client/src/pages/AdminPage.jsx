@@ -12,7 +12,7 @@ export default function AdminPage() {
   useEffect(() => { document.title = `${t('admin.title')} — FitShoes`; loadProducts(); }, []);
 
   async function loadProducts() {
-    try { const res = await fetchProducts(); setProducts(res.data || []); } catch {}
+    try { const res = await fetchProducts(); setProducts(res.data?.data || []); } catch {}
   }
 
   async function handleSubmit(e) {
