@@ -28,7 +28,7 @@ export default function VerifyOtpPage() {
     setError('');
     try {
       const res = await verifyOtp(email, otp);
-      if (res.data?.user) { login(res.data.user); navigate('/'); }
+      if (res.data?.user && res.data?.token) { login(res.data.user, res.data.token); navigate('/'); }
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');
     }

@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -34,8 +35,8 @@ export default function App() {
                 <Route path="/product/:id" element={<ProductDetailPage />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/logs" element={<LogsPage />} />
+                <Route path="/admin" element={<ProtectedRoute requireAdminAccess><AdminPage /></ProtectedRoute>} />
+                <Route path="/logs" element={<ProtectedRoute requireAdminAccess><LogsPage /></ProtectedRoute>} />
                 <Route path="/payment-success" element={<PaymentSuccessPage />} />
                 <Route path="/service/:id" element={<ServiceDetailPage />} />
                 <Route path="*" element={<NotFoundPage />} />

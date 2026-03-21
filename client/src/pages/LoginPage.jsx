@@ -23,7 +23,7 @@ export default function LoginPage() {
       if (res.data?.needOtp) {
         navigate('/verify-otp', { state: { email, from: 'login' } });
       } else if (res.data?.user) {
-        login(res.data.user);
+        login(res.data.user, res.data?.token);
         navigate('/');
       }
     } catch (err) {
@@ -39,8 +39,8 @@ export default function LoginPage() {
         callback: async (response) => {
           try {
             const res = await loginGoogle(response.credential);
-            if (res.data?.user) {
-              login(res.data.user);
+            if (res.data?.user && res.data?.token) {
+              login(res.data.user, res.data.token);
               navigate('/');
             }
           } catch { setError('Google login failed'); }

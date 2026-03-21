@@ -2,6 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
+const LogEntry = require('./models/LogEntry');
 
 const LOG_DIR = path.join(__dirname, 'logs');
 
@@ -13,6 +15,7 @@ if (!fs.existsSync(LOG_DIR)) {
 class Logger {
   constructor(filename) {
     this.filename = path.join(LOG_DIR, filename);
+    this.logType = filename.replace(/\.log$/i, '');
   }
 
   log(level, message, data = {}) {
@@ -29,6 +32,19 @@ class Logger {
       fs.appendFileSync(this.filename, logLine);
     } catch (err) {
       console.error(`Failed to write to log file ${this.filename}:`, err.message);
+    }
+
+    // Mirror logs into MongoDB when available so admin/log pages can query centrally.
+    if (mongoose.connection.readyState === 1) {
+      LogEntry.create({
+        timestamp: new Date(timestamp),
+        level,
+        message,
+        logType: this.logType,
+        data
+      }).catch((err) => {
+        console.error(`Failed to write log entry to database (${this.logType}):`, err.message);
+      });
     }
     
     console.log(`[${level}] ${message}`, data);

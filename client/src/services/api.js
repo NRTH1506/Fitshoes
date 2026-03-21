@@ -4,10 +4,16 @@
 
 const BASE = import.meta.env.VITE_API_URL || '';
 
+function getStoredAuthToken() {
+  return localStorage.getItem('authToken') || '';
+}
+
 async function request(endpoint, options = {}) {
   const url = `${BASE}${endpoint}`;
+  const token = getStoredAuthToken();
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
   const config = {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeaders, ...options.headers },
     ...options,
   };
   const res = await fetch(url, config);
@@ -38,15 +44,17 @@ export const resendOtp = (email) =>
 
 // ─── User ─────────────────────────────────────────────
 export const getMe = () =>
-  request('/api/me', { credentials: 'include' });
+  request('/api/me');
 
 export const updateProfile = (payload) =>
   request('/api/profile', { method: 'PUT', body: JSON.stringify(payload) });
 
 export const uploadAvatar = (formData) => {
+  const token = getStoredAuthToken();
   return fetch(`${import.meta.env.VITE_API_URL || ''}/api/profile/upload`, {
     method: 'POST',
     body: formData,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   }).then(async (res) => {
     const data = await res.json();
     if (!res.ok) {
@@ -65,11 +73,8 @@ export const getProducts = () =>
 export const getProduct = (id) =>
   request(`/api/products/${id}`);
 
-export const addProduct = (payload, adminKey) => {
-  const headers = {};
-  if (adminKey) headers['x-admin-key'] = adminKey;
-  return request('/api/products/add', { method: 'POST', body: JSON.stringify(payload), headers });
-};
+export const addProduct = (payload) =>
+  request('/api/products/add', { method: 'POST', body: JSON.stringify(payload) });
 
 export const deleteProduct = (id) =>
   request(`/api/products/${id}`, { method: 'DELETE' });
@@ -89,8 +94,20 @@ export const sendChatMessage = (message, userId, isAdmin) =>
   request('/api/chat', { method: 'POST', body: JSON.stringify({ message, userId, isAdmin }) });
 
 // ─── Logs ─────────────────────────────────────────────
-export const getLogs = (type) =>
-  request(`/api/logs?type=${type}`);
+export const getLogs = (params = {}) => {
+  if (typeof params === 'string') {
+    return request(`/api/logs?type=${encodeURIComponent(params)}`);
+  }
+
+  const query = new URLSearchParams();
+  if (params.type) query.set('type', params.type);
+  if (params.search) query.set('search', params.search);
+  if (params.page) query.set('page', String(params.page));
+  if (params.limit) query.set('limit', String(params.limit));
+
+  const qs = query.toString();
+  return request(`/api/logs${qs ? `?${qs}` : ''}`);
+};
 
 // ─── Aliases (used by page components) ────────────────
 export { getProducts as fetchProducts };
