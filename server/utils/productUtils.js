@@ -26,15 +26,15 @@ function buildProductPayload(body) {
     : Number(body.oldPrice);
 
   if (!title || !titleVi) {
-    return { error: 'ThiÃ¡ÂºÂ¿u thÃƒÂ´ng tin sÃ¡ÂºÂ£n phÃ¡ÂºÂ©m' };
+    return { error: 'Thiếu thông tin sản phẩm' };
   }
 
   if (!Number.isFinite(price) || price <= 0) {
-    return { error: 'GiÃƒÂ¡ sÃ¡ÂºÂ£n phÃ¡ÂºÂ©m khÃƒÂ´ng hÃ¡Â»Â£p lÃ¡Â»â€¡' };
+    return { error: 'Giá sản phẩm không hợp lệ' };
   }
 
   if (oldPrice !== undefined && (!Number.isFinite(oldPrice) || oldPrice < 0)) {
-    return { error: 'GiÃƒÂ¡ cÃ¡Â»Â§ khÃƒÂ´ng hÃ¡Â»Â£p lÃ¡Â»â€¡' };
+    return { error: 'Giá cũ không hợp lệ' };
   }
 
   return {
@@ -57,7 +57,7 @@ function loadStaticProducts(baseDir) {
     const raw = fs.readFileSync(path.join(baseDir, 'static-products.json'), 'utf8');
     return JSON.parse(raw);
   } catch (e) {
-    console.warn('KhÃ´ng thá»ƒ load static-products.json', e && e.message);
+    console.warn('Không thể load static-products.json', e && e.message);
     return [];
   }
 }

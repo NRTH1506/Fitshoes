@@ -99,7 +99,7 @@ async function sendEmailViaGmailAPI({ to, subject, text }) {
     if (!GMAIL_USER_EMAIL) missing.push('GMAIL_USER');
 
     if (missing.length > 0) {
-        console.warn(`âš ï¸ [Gmail API] Credentials missing in Render: ${missing.join(', ')}`);
+        console.warn(`⚠️ [Gmail API] Credentials missing in Render: ${missing.join(', ')}`);
         return;
     }
 
@@ -185,7 +185,7 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'QuÃ¡ nhiá»u yÃªu cáº§u, vui lÃ²ng thá»­ láº¡i sau.' } });
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'Quá nhiều yêu cầu, vui lòng thử lại sau.' } });
 
 app.use(logHttpRequest);
 app.use(express.json());

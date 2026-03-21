@@ -10,18 +10,18 @@ module.exports = ({
         try {
             if (!dbConnectedRef()) return res.status(503).json({ success: false, message: 'Database unavailable' });
             if (!isValidObjectId(req.params.id)) {
-                return res.status(400).json({ success: false, message: 'Id khÃƒÂ´ng hÃ¡Â»Â£p lÃ¡Â»â€¡' });
+                return res.status(400).json({ success: false, message: 'Id không hợp lệ' });
             }
             try {
                 const user = await User.findById(req.params.id).select('name email');
-                if (!user) return res.status(404).json({ success: false, message: 'KhÃƒÂ´ng tÃƒÂ¬m thÃ¡ÂºÂ¥y ngÃ†Â°Ã¡Â»Âi dÃƒÂ¹ng' });
+                if (!user) return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
                 return res.json({ success: true, data: { id: user._id, name: user.name, email: user.email } });
             } catch (e) {
-                return res.status(400).json({ success: false, message: 'Id khÃƒÂ´ng hÃ¡Â»Â£p lÃ¡Â»â€¡' });
+                return res.status(400).json({ success: false, message: 'Id không hợp lệ' });
             }
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -41,7 +41,7 @@ module.exports = ({
             if (gender !== undefined) {
                 const cleanGender = String(gender || '').trim();
                 if (!['', 'male', 'female', 'other'].includes(cleanGender)) {
-                    return res.status(400).json({ success: false, message: 'Gender khÃƒÆ’Ã‚Â´ng hÃƒÂ¡Ã‚Â»Ã‚Â£p lÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¡' });
+                    return res.status(400).json({ success: false, message: 'Gender không hợp lệ' });
                 }
                 user.gender = cleanGender;
             }
@@ -57,7 +57,7 @@ module.exports = ({
             });
         } catch (err) {
             console.error('Error updating profile:', err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -65,7 +65,7 @@ module.exports = ({
         upload.single('avatar')(req, res, async (err) => {
             if (err instanceof multer.MulterError) {
                 console.error('[Upload] Multer Error:', err.code, err.field);
-                return res.status(400).json({ success: false, message: `LÃ¡Â»â€”i upload: ${err.message} (Field: ${err.field})` });
+                return res.status(400).json({ success: false, message: `Lỗi upload: ${err.message} (Field: ${err.field})` });
             } else if (err) {
                 console.error('[Upload] Custom Error:', err.message);
                 return res.status(400).json({ success: false, message: err.message });
@@ -104,7 +104,7 @@ module.exports = ({
                 res.json({ success: true, avatarUrl, user: sanitizeUser(user) });
             } catch (err) {
                 console.error('[Upload] Server Error:', err);
-                res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server: ' + err.message });
+                res.status(500).json({ success: false, message: 'Lỗi server: ' + err.message });
             }
         });
     }

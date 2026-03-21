@@ -29,7 +29,7 @@ module.exports = ({
             if (status !== "PENDING") await Order.findOneAndUpdate({ app_trans_id }, { status });
             return res.json({ success: true, status, detail: queryRes.data });
         } catch (err) {
-            return res.status(500).json({ success: false, message: "LÃ¡Â»â€”i truy vÃ¡ÂºÂ¥n Ã„â€˜Ã†Â¡n hÃƒÂ ng" });
+            return res.status(500).json({ success: false, message: "Lỗi truy vấn đơn hàng" });
         }
     },
 
@@ -37,7 +37,7 @@ module.exports = ({
         try {
             const { userId } = req.params;
             if (!userId) {
-                return res.status(400).json({ success: false, message: "ThiÃƒÂ¡Ã‚ÂºÃ‚Â¿u userId" });
+                return res.status(400).json({ success: false, message: "Thiếu userId" });
             }
             const canViewOrders = String(req.user.id) === String(userId)
                 || req.user.role === 'admin'
@@ -48,7 +48,7 @@ module.exports = ({
             const orders = await Order.find({ userId }).sort({ createdAt: -1 });
             return res.json({ success: true, orders });
         } catch (err) {
-            return res.status(500).json({ success: false, message: "LÃ¡Â»â€”i lÃ¡ÂºÂ¥y lÃ¡Â»â€¹ch sÃ¡Â»Â­ Ã„â€˜Ã†Â¡n hÃƒÂ ng" });
+            return res.status(500).json({ success: false, message: "Lỗi lấy lịch sử đơn hàng" });
         }
     },
 
@@ -57,7 +57,7 @@ module.exports = ({
             const { amount, items, userId } = req.body;
 
             if (!Number.isFinite(Number(amount)) || Number(amount) <= 0 || !Array.isArray(items) || items.length === 0) {
-                return res.json({ success: false, message: "Thiáº¿u dá»¯ liá»‡u Ä‘Æ¡n hÃ ng" });
+                return res.json({ success: false, message: "Thiếu dữ liệu đơn hàng" });
             }
 
             const app_trans_id = `${moment().format("YYMMDD")}_${Date.now()}`;
@@ -77,7 +77,7 @@ module.exports = ({
                 app_time: Date.now(),
                 item: JSON.stringify(items),
                 amount: Number(amount),
-                description: `Thanh toÃ¡n Ä‘Æ¡n hÃ ng #${app_trans_id}`,
+                description: `Thanh toán đơn hàng #${app_trans_id}`,
                 bank_code: "zalopayapp",
                 embed_data: JSON.stringify(embed_data),
                 callback_url: callback_url
@@ -95,7 +95,7 @@ module.exports = ({
 
             orderData.mac = crypto.createHmac("sha256", ZALOPAY.key1).update(dataToSign).digest("hex");
 
-            console.log(`[ZaloPay] Táº¡o Ä‘Æ¡n hÃ ng ${app_trans_id}...`);
+            console.log(`[ZaloPay] Tạo đơn hàng ${app_trans_id}...`);
 
             const formBody = new URLSearchParams(orderData).toString();
             const zalores = await axios.post(ZALOPAY.endpoint, formBody, {
@@ -108,7 +108,7 @@ module.exports = ({
             if (returnCode !== 1) {
                 return res.json({
                     success: false,
-                    message: "ZaloPay tá»« chá»‘i: " + (zalores.data.return_message || "Lá»—i"),
+                    message: "ZaloPay từ chối: " + (zalores.data.return_message || "Lỗi"),
                     detail: zalores.data
                 });
             }
@@ -129,8 +129,8 @@ module.exports = ({
             });
 
         } catch (err) {
-            console.error("[ZaloPay] Lá»—i táº¡o Ä‘Æ¡n:", err.message);
-            return res.json({ success: false, message: "Lá»—i káº¿t ná»‘i cá»•ng thanh toÃ¡n." });
+            console.error("[ZaloPay] Lỗi tạo đơn:", err.message);
+            return res.json({ success: false, message: "Lỗi kết nối cổng thanh toán." });
         }
     },
 
@@ -151,7 +151,7 @@ module.exports = ({
                 const dataJson = JSON.parse(dataStr);
                 const { app_trans_id, amount } = dataJson;
 
-                console.log(`[ZaloPay Callback] Nháº­n tÃ­n hiá»‡u tá»« ZaloPay: ${app_trans_id}`);
+                console.log(`[ZaloPay Callback] Nhận tín hiệu từ ZaloPay: ${app_trans_id}`);
 
                 const order = await Order.findOneAndUpdate(
                     { app_trans_id: app_trans_id },
@@ -160,7 +160,7 @@ module.exports = ({
                 );
 
                 if (order) {
-                    console.log(`[DB] ÄÃ£ update Ä‘Æ¡n hÃ ng ${app_trans_id} thÃ nh SUCCESS`);
+                    console.log(`[DB] Đã update đơn hàng ${app_trans_id} thành SUCCESS`);
 
                     let userEmail = '';
                     if (order.userId && mongoose.Types.ObjectId.isValid(order.userId)) {
@@ -170,7 +170,7 @@ module.exports = ({
                     if (userEmail && GMAIL_REFRESH_TOKEN) {
                         sendEmailViaGmailAPI({
                             to: userEmail,
-                            subject: `[FitShoes] Thanh toÃƒÂ¡n thÃƒÂ nh cÃƒÂ´ng #${app_trans_id}`,
+                            subject: `[FitShoes] Thanh toán thành công #${app_trans_id}`,
                             text: [
                                 'Cam on ban da mua hang tai FitShoes.',
                                 `Ma don: ${app_trans_id}`,
@@ -190,12 +190,12 @@ module.exports = ({
                         const mailOptions = {
                             from: GMAIL_USER,
                             to: userEmail,
-                            subject: `[FitShoes] Thanh toÃ¡n thÃ nh cÃ´ng #${app_trans_id}`,
+                            subject: `[FitShoes] Thanh toán thành công #${app_trans_id}`,
                             html: `
-                            <h2>Cáº£m Æ¡n báº¡n Ä‘Ã£ mua hÃ ng!</h2>
-                            <p>MÃ£ Ä‘Æ¡n: <b>${app_trans_id}</b></p>
-                            <p>Sá»‘ tiá»n: <b>${new Intl.NumberFormat('vi-VN').format(amount)} Ä‘</b></p>
-                            <p>Tráº¡ng thÃ¡i: <span style="color:green">THÃ€NH CÃ”NG</span></p>
+                            <h2>Cảm ơn bạn đã mua hàng!</h2>
+                            <p>Mã đơn: <b>${app_trans_id}</b></p>
+                            <p>Số tiền: <b>${new Intl.NumberFormat('vi-VN').format(amount)} đ</b></p>
+                            <p>Trạng thái: <span style="color:green">THÀNH CÔNG</span></p>
                         `
                         };
 

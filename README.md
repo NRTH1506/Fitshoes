@@ -1,139 +1,189 @@
-# 🏃 FitShoes — E-Commerce Shoe Store
+# FitShoes
 
-A full-stack e-commerce platform for athletic shoes built with **React**, **Node.js/Express**, and **MongoDB**. Features secure authentication with OTP verification, Google Sign-In, ZaloPay payment integration, an AI-powered chatbot, and comprehensive admin tools.
+FitShoes is a full-stack shoe store application with a React frontend and an Express/MongoDB backend. It includes OTP-based authentication, Google sign-in, JWT-protected admin access, product management, profile updates, ZaloPay payment flow, request logging, and an AI chatbot.
 
-## ✨ Features
+## Stack
 
-### 🛍️ Shopping
-- Product catalog with gender-based filtering (Nam / Nữ / Unisex)
-- Product detail pages with image gallery, size selection, and quantity controls
-- Shopping cart with real-time price calculation and free shipping threshold
-- ZaloPay sandbox payment integration
+- Frontend: React, Vite, React Router
+- Backend: Node.js, Express
+- Database: MongoDB with Mongoose
+- Auth: JWT, OTP email verification, Google sign-in
+- Payments: ZaloPay sandbox
+- AI: OpenAI / Gemini-backed chatbot
 
-### 🔐 Security & Authentication
-- Email/password registration with **OTP email verification**
-- **Google Sign-In** (OAuth 2.0)
-- Password hashing with **bcrypt**
-- Rate limiting on auth endpoints (`express-rate-limit`)
-- Secure HTTP headers via **Helmet**
-- CORS configuration with environment-based allowed origins
+## Project Structure
 
-### 🤖 AI Chatbot
-- OpenAI-powered customer assistant
-- Product search and store policy Q&A
-- Conversation history persistence
-- Admin-aware command handling
-
-### 📊 Admin & Monitoring
-- Product management (add/delete)
-- Structured JSON logging (HTTP, auth, audit, errors)
-- Log viewer with filtering, search, and pagination
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 19, Vite 8, React Router 7 |
-| **Backend** | Node.js, Express 4 |
-| **Database** | MongoDB (Mongoose 7) |
-| **Auth** | bcrypt, Google OAuth, OTP (Nodemailer) |
-| **Payments** | ZaloPay Sandbox |
-| **AI** | OpenAI GPT-3.5 Turbo |
-| **Security** | Helmet, express-rate-limit, CORS |
-
-## 📁 Project Structure
-
-```
-Fitshoes/
-├── client/                  # React frontend (Vite)
-│   ├── public/assets/       # Images and static assets
-│   └── src/
-│       ├── components/      # Navbar, Footer, ChatbotWidget, Layout, ErrorBoundary
-│       ├── contexts/        # AuthContext, CartContext
-│       ├── pages/           # 13 page components
-│       ├── services/        # Centralized API client
-│       ├── styles/          # Global CSS + media queries
-│       └── utils/           # formatPrice, toast
-├── server/                  # Express API backend
-│   ├── middleware/           # HTTP, auth, audit, error loggers
-│   ├── models/              # Mongoose models
-│   ├── routes/              # Admin, chatbot routes
-│   ├── server.js            # Main server (auth, products, payments, logs)
-│   └── .env.example         # Environment variable template
-└── client-legacy/           # Original HTML/CSS/JS (pre-React)
+```text
+Fitshoes-main/
+├─ client/
+│  ├─ public/
+│  └─ src/
+│     ├─ components/
+│     ├─ contexts/
+│     ├─ i18n/
+│     ├─ pages/
+│     ├─ services/
+│     ├─ styles/
+│     └─ utils/
+├─ server/
+│  ├─ controllers/
+│  ├─ middleware/
+│  ├─ models/
+│  ├─ routes/
+│  ├─ utils/
+│  ├─ app.js
+│  ├─ server.js
+│  └─ .env.example
+└─ README.md
 ```
 
-## 🚀 Getting Started
+## Main Features
 
-### Prerequisites
-- **Node.js** ≥ 18
-- **MongoDB** (local or [Atlas](https://www.mongodb.com/atlas))
+- Browse products and view product details
+- Register and log in with email + OTP verification
+- Sign in with Google
+- JWT-based protected routes
+- Admin and authorized-user access control for admin pages and logs
+- Profile update and avatar upload
+- Order history and ZaloPay payment integration
+- Request, auth, audit, and error logging
+- AI chatbot for store assistance
 
-### 1. Clone the repo
-```bash
-git clone https://github.com/your-username/Fitshoes.git
-cd Fitshoes
+## Authentication Flow
+
+1. `POST /api/register` creates an account and sends an OTP.
+2. `POST /api/login` validates credentials and sends an OTP.
+3. `POST /api/verify-otp` completes sign-in and returns:
+
+```json
+{
+  "success": true,
+  "token": "jwt-token",
+  "user": {}
+}
 ```
 
-### 2. Set up the backend
+4. `POST /api/login-google` also returns:
+
+```json
+{
+  "success": true,
+  "token": "jwt-token",
+  "user": {}
+}
+```
+
+5. The frontend uses the JWT for protected requests and `GET /api/me` to load the current user.
+
+## Key API Endpoints
+
+### Auth
+
+- `POST /api/register`
+- `POST /api/login`
+- `POST /api/verify-otp`
+- `POST /api/resend-otp`
+- `POST /api/login-google`
+- `GET /api/me`
+
+### Products
+
+- `GET /api/products`
+- `GET /api/products/:id`
+- `POST /api/products/add`
+- `PUT /api/products/:id`
+- `DELETE /api/products/:id`
+
+### User
+
+- `PUT /api/profile`
+- `POST /api/profile/upload`
+- `GET /api/users/:id`
+
+### Orders and Payments
+
+- `GET /api/orders/user/:userId`
+- `POST /api/pay/zalopay`
+- `GET /api/pay/zalopay/query/:app_trans_id`
+- `POST /api/zalopay/callback`
+
+### Admin and Logs
+
+- `GET /api/logs`
+
+### System and Chatbot
+
+- `GET /api/health`
+- `GET /api/ping`
+- `POST /api/chat`
+- `POST /api/chat/clear`
+
+## Environment Setup
+
+Copy the example environment file and fill in your real values:
+
 ```bash
 cd server
-cp .env.example .env        # Edit with your credentials
-npm install
-npm start                   # Runs on http://localhost:8081
+cp .env.example .env
 ```
 
-### 3. Set up the frontend
+Important backend variables include:
+
+- `PORT`
+- `MONGO_URI`
+- `JWT_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_API_CLIENT_ID`
+- `GOOGLE_API_CLIENT_SECRET`
+- `GOOGLE_API_REFRESH_TOKEN`
+- `GMAIL_USER`
+- `FE_ORIGINS`
+- `OPENAI_API_KEY`
+- `GEMINI_API_KEY`
+- `ZALOPAY_APP_ID`
+- `ZALOPAY_KEY1`
+- `ZALOPAY_KEY2`
+- `ZALOPAY_ENDPOINT`
+- `ZALOPAY_CALLBACK_URL`
+
+## Local Development
+
+### Backend
+
+```bash
+cd server
+npm install
+npm start
+```
+
+Backend runs on `http://localhost:8081` by default.
+
+### Frontend
+
 ```bash
 cd client
 npm install
-npm run dev                 # Runs on http://localhost:5173
+npm run dev
 ```
 
-The Vite dev server proxies `/api` requests to `localhost:8081` automatically.
+Frontend runs on `http://localhost:5173` by default.
 
-### Environment Variables
+## Admin Access
 
-See [`server/.env.example`](server/.env.example) for all required variables:
-- `MONGO_URI` — MongoDB connection string
-- `GOOGLE_CLIENT_ID` — Google OAuth client ID
-- `GMAIL_USER` / `GMAIL_APP_PASSWORD` — For OTP emails
-- `OPENAI_API_KEY` — For the AI chatbot
-- `ZALOPAY_*` — Payment gateway config
-- `FE_ORIGINS` — Allowed frontend origins (CORS)
+Admin-only operations use JWT authentication and require one of these:
 
-## 🌐 Deployment
+- `user.role === "admin"`
+- `user.canAccessAdmin === true`
 
-| Service | Platform | Config |
-|---------|----------|--------|
-| Frontend | **Vercel** | Framework: Vite, Env: `VITE_API_URL` |
-| Backend | **Render** | Root: `server/`, Start: `node server.js` |
-| Database | **MongoDB Atlas** | Free tier (512MB) |
+This applies to product management and log access.
 
-## 📝 API Endpoints
+## Notes
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/health` | Health check |
-| `POST` | `/api/register` | User registration |
-| `POST` | `/api/login` | Login (returns OTP requirement) |
-| `POST` | `/api/login-google` | Google OAuth login |
-| `POST` | `/api/verify-otp` | OTP verification |
-| `POST` | `/api/resend-otp` | Resend OTP code |
-| `GET` | `/api/products` | List all products |
-| `GET` | `/api/products/:id` | Product details |
-| `POST` | `/api/products/add` | Add product (admin) |
-| `DELETE` | `/api/products/:id` | Delete product (admin) |
-| `PUT` | `/api/profile` | Update user profile |
-| `POST` | `/api/pay/zalopay` | Create ZaloPay order |
-| `POST` | `/api/chat` | AI chatbot message |
-| `GET` | `/api/logs` | View system logs |
+- Product reads can fall back to `server/static-products.json` if MongoDB is unavailable.
+- Uploaded avatars are stored under `server/uploads/`.
+- Health check is available at `GET /api/health`.
+- The backend entry point is `server/server.js`, while Express app configuration lives in `server/app.js`.
 
-## 📄 License
+## License
 
-This project is for educational and portfolio purposes.
-
----
-
-Built with ❤️ by Thanh Hoang Nguyen
-# Fitshoes
+This project is intended for learning and portfolio use.

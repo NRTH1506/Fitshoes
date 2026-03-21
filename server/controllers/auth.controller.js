@@ -21,13 +21,13 @@ module.exports = ({
             if (!dbConnectedRef()) return res.status(503).json({ success: false, message: 'Database unavailable' });
             const { name, email, password, phone, gender, address } = req.body || {};
             if (!name || !email || !password) {
-                return res.status(400).json({ success: false, message: 'ThiÃ¡ÂºÂ¿u thÃƒÂ´ng tin' });
+                return res.status(400).json({ success: false, message: 'Thiếu thông tin' });
             }
 
             const lowerEmail = normalizeEmail(email);
             const existingEmail = await User.findOne({ email: lowerEmail });
             if (existingEmail) {
-                return res.status(409).json({ success: false, message: 'Email Ã„â€˜ÃƒÂ£ tÃ¡Â»â€œn tÃ¡ÂºÂ¡i' });
+                return res.status(409).json({ success: false, message: 'Email đã tồn tại' });
             }
 
             const passwordHash = await hasher.hashPassword(password);
@@ -54,19 +54,19 @@ module.exports = ({
             if (GMAIL_REFRESH_TOKEN) {
                 sendEmailViaGmailAPI({
                     to: lowerEmail,
-                    subject: '[FitShoes] XÃƒÂ¡c thÃ¡Â»Â±c tÃƒÂ i khoÃ¡ÂºÂ£n',
-                    text: `ChÃƒÂ o ${String(name).trim()},\n\nMÃƒÂ£ xÃƒÂ¡c thÃ¡Â»Â±c cÃ¡Â»Â§a bÃ¡ÂºÂ¡n lÃƒÂ : ${otpCode}\n\nMÃƒÂ£ sÃ¡ÂºÂ½ hÃ¡ÂºÂ¿t hÃ¡ÂºÂ¡n trong 10 phÃƒÂºt.\n\nTrÃƒÂ¢n trÃ¡Â»Âng,\nFitShoes Team`
+                    subject: '[FitShoes] Xác thực tài khoản',
+                    text: `Chào ${String(name).trim()},\n\nMã xác thực của bạn là: ${otpCode}\n\nMã sẽ hết hạn trong 10 phút.\n\nTrân trọng,\nFitShoes Team`
                 });
                 console.log(`Async Register OTP (Gmail API) initiated for ${lowerEmail}`);
             } else {
                 console.warn('Gmail API credentials missing');
             }
 
-            return res.status(201).json({ success: true, message: 'Ã„ÂÃ„Æ’ng kÃƒÂ½ thÃƒÂ nh cÃƒÂ´ng. Vui lÃƒÂ²ng kiÃ¡Â»Æ’m tra email Ã„â€˜Ã¡Â»Æ’ xÃƒÂ¡c thÃ¡Â»Â±c.', email: lowerEmail });
+            return res.status(201).json({ success: true, message: 'Đăng ký thành công. Vui lòng kiểm tra email để xác thực.', email: lowerEmail });
 
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -76,19 +76,19 @@ module.exports = ({
             const { email, password } = req.body || {};
             const normalizedEmail = normalizeEmail(email);
             if (!normalizedEmail || !password) {
-                return res.status(400).json({ success: false, message: 'ThiÃƒÂ¡Ã‚ÂºÃ‚Â¿u thÃƒÆ’Ã‚Â´ng tin' });
+                return res.status(400).json({ success: false, message: 'Thiếu thông tin' });
             }
 
             const user = await User.findOne({ email: normalizedEmail });
             if (!user) {
                 logLoginAttempt(normalizedEmail, false, req.ip, 'password');
-                return res.status(401).json({ success: false, message: 'Email hoÃ¡ÂºÂ·c mÃ¡ÂºÂ­t khÃ¡ÂºÂ©u khÃƒÂ´ng Ã„â€˜ÃƒÂºng' });
+                return res.status(401).json({ success: false, message: 'Email hoặc mật khẩu không đúng' });
             }
 
             const ok = await hasher.verifyPassword(password, user.passwordHash);
             if (!ok) {
                 logLoginAttempt(normalizedEmail, false, req.ip, 'password');
-                return res.status(401).json({ success: false, message: 'Email hoÃ¡ÂºÂ·c mÃ¡ÂºÂ­t khÃ¡ÂºÂ©u khÃƒÂ´ng Ã„â€˜ÃƒÂºng' });
+                return res.status(401).json({ success: false, message: 'Email hoặc mật khẩu không đúng' });
             }
 
             logLoginAttempt(normalizedEmail, true, req.ip, 'password');
@@ -116,7 +116,7 @@ module.exports = ({
 
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -172,7 +172,7 @@ module.exports = ({
             }
 
             setLastGoogleLogin({ email: user.email, name: user.name, userId: String(user._id), at: new Date().toISOString() });
-            console.log('Ã¢Å“â€¦ Google login success:', getLastGoogleLogin().email);
+            console.log('✅ Google login success:', getLastGoogleLogin().email);
             logLoginAttempt(user.email, true, req.ip, 'google');
 
             const token = createAccessToken(user);
@@ -184,7 +184,7 @@ module.exports = ({
             });
         } catch (err) {
             console.error('[Google Login Error] Fatal Exception:', err.message);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server', details: err.message });
+            return res.status(500).json({ success: false, message: 'Lỗi server', details: err.message });
         }
     },
 
@@ -220,7 +220,7 @@ module.exports = ({
             });
         } catch (err) {
             console.error('Error in /api/verify-otp', err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -231,7 +231,7 @@ module.exports = ({
 
             const cleanEmail = normalizeEmail(email);
             const user = await User.findOne({ email: cleanEmail });
-            if (!user) return res.status(400).json({ success: false, message: 'NgÃ†Â°Ã¡Â»Âi dÃƒÂ¹ng khÃƒÂ´ng tÃ¡Â»â€œn tÃ¡ÂºÂ¡i' });
+            if (!user) return res.status(400).json({ success: false, message: 'Người dùng không tồn tại' });
 
             await Otp.deleteMany({ email: cleanEmail });
 
@@ -242,25 +242,25 @@ module.exports = ({
                 await Otp.create({ email: cleanEmail, code: otpCode, expiresAt: otpExpiry });
             } catch (e) {
                 console.error('Failed to create new OTP record', e && e.message);
-                return res.status(500).json({ success: false, message: 'KhÃƒÂ´ng thÃ¡Â»Æ’ tÃ¡ÂºÂ¡o mÃƒÂ£ xÃƒÂ¡c thÃ¡Â»Â±c' });
+                return res.status(500).json({ success: false, message: 'Không thể tạo mã xác thực' });
             }
 
             if (GMAIL_REFRESH_TOKEN) {
                 sendEmailViaGmailAPI({
                     to: cleanEmail,
-                    subject: 'FitShoes - MÃƒÂ£ xÃƒÂ¡c thÃ¡Â»Â±c mÃ¡Â»â€ºi',
-                    text: `MÃƒÂ£ xÃƒÂ¡c thÃ¡Â»Â±c mÃ¡Â»â€ºi cÃ¡Â»Â§a bÃ¡ÂºÂ¡n lÃƒÂ : ${otpCode}\n\nMÃƒÂ£ sÃ¡ÂºÂ½ hÃ¡ÂºÂ¿t hÃ¡ÂºÂ¡n trong 10 phÃƒÂºt.\n\nVui lÃƒÂ²ng khÃƒÂ´ng chia sÃ¡ÂºÂ» mÃƒÂ£ nÃƒÂ y vÃ¡Â»â€ºi ai khÃƒÂ¡c.`
+                    subject: 'FitShoes - Mã xác thực mới',
+                    text: `Mã xác thực mới của bạn là: ${otpCode}\n\nMã sẽ hết hạn trong 10 phút.\n\nVui lòng không chia sẻ mã này với ai khác.`
                 });
                 console.log(`Async resend OTP (Gmail API) initiated for ${cleanEmail}`);
             } else {
                 console.warn('Gmail API credentials missing');
-                return res.status(500).json({ success: false, message: 'HÃ¡Â»â€¡ thÃ¡Â»â€˜ng email khÃƒÂ´ng khÃ¡ÂºÂ£ dÃ¡Â»Â¥ng' });
+                return res.status(500).json({ success: false, message: 'Hệ thống email không khả dụng' });
             }
 
-            return res.json({ success: true, message: 'MÃƒÂ£ xÃƒÂ¡c thÃ¡Â»Â±c mÃ¡Â»â€ºi Ã„â€˜ÃƒÂ£ Ã„â€˜Ã†Â°Ã¡Â»Â£c gÃ¡Â»Â­i' });
+            return res.json({ success: true, message: 'Mã xác thực mới đã được gửi' });
         } catch (err) {
             console.error('Error in /api/resend-otp', err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -277,7 +277,7 @@ module.exports = ({
             return res.json({ success: true, user: sanitizeUser(user) });
         } catch (err) {
             console.error('Error in /api/me', err);
-            return res.status(500).json({ success: false, message: 'LÃƒÂ¡Ã‚Â»Ã¢â‚¬â€i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     }
 });

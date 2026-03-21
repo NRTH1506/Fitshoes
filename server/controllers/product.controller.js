@@ -20,7 +20,7 @@ module.exports = ({
             }
 
             if (!payload && (!title_vi || !price)) {
-                return res.status(400).json({ success: false, message: 'ThiÃ¡ÂºÂ¿u thÃƒÂ´ng tin sÃ¡ÂºÂ£n phÃ¡ÂºÂ©m' });
+                return res.status(400).json({ success: false, message: 'Thiếu thông tin sản phẩm' });
             }
 
             const product = new Product(payload || {
@@ -41,10 +41,10 @@ module.exports = ({
                 price: product.price,
                 currency: product.currency
             });
-            return res.status(201).json({ success: true, message: 'ThÃƒÂªm sÃ¡ÂºÂ£n phÃ¡ÂºÂ©m thÃƒÂ nh cÃƒÂ´ng', product });
+            return res.status(201).json({ success: true, message: 'Thêm sản phẩm thành công', product });
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -76,10 +76,10 @@ module.exports = ({
                 if (p) return res.json({ success: true, data: p });
             }
 
-            return res.status(404).json({ success: false, message: 'KhÃƒÂ´ng tÃƒÂ¬m thÃ¡ÂºÂ¥y sÃ¡ÂºÂ£n phÃ¡ÂºÂ©m' });
+            return res.status(404).json({ success: false, message: 'Không tìm thấy sản phẩm' });
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -88,7 +88,7 @@ module.exports = ({
             if (!dbConnectedRef()) return res.status(503).json({ success: false, message: 'Database unavailable' });
 
             if (!isValidObjectId(req.params.id)) {
-                return res.status(400).json({ success: false, message: 'Id sÃƒÂ¡Ã‚ÂºÃ‚Â£n phÃƒÂ¡Ã‚ÂºÃ‚Â©m khÃƒÆ’Ã‚Â´ng hÃƒÂ¡Ã‚Â»Ã‚Â£p lÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¡' });
+                return res.status(400).json({ success: false, message: 'Id sản phẩm không hợp lệ' });
             }
 
             const { payload, error } = buildProductPayload(req.body);
@@ -99,7 +99,7 @@ module.exports = ({
             }
 
             if (!payload && (!title || !title_vi || !price)) {
-                return res.status(400).json({ success: false, message: 'ThiÃ¡ÂºÂ¿u thÃƒÂ´ng tin sÃ¡ÂºÂ£n phÃ¡ÂºÂ©m' });
+                return res.status(400).json({ success: false, message: 'Thiếu thông tin sản phẩm' });
             }
 
             try {
@@ -120,14 +120,14 @@ module.exports = ({
 
                 if (product) {
                     logProductUpdate(req.user?.id || 'unknown', req.user?.email || 'unknown', req.params.id, product);
-                    return res.json({ success: true, message: 'CÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t sÃ¡ÂºÂ£n phÃ¡ÂºÂ©m thÃƒÂ nh cÃƒÂ´ng', product });
+                    return res.json({ success: true, message: 'Cập nhật sản phẩm thành công', product });
                 }
             } catch (e) { }
 
-            return res.status(404).json({ success: false, message: 'SÃ¡ÂºÂ£n phÃ¡ÂºÂ©m khÃƒÂ´ng tÃ¡Â»â€œn tÃ¡ÂºÂ¡i' });
+            return res.status(404).json({ success: false, message: 'Sản phẩm không tồn tại' });
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     },
 
@@ -135,21 +135,21 @@ module.exports = ({
         try {
             if (!dbConnectedRef()) return res.status(503).json({ success: false, message: 'Database unavailable' });
             if (!isValidObjectId(req.params.id)) {
-                return res.status(400).json({ success: false, message: 'Id sÃƒÂ¡Ã‚ÂºÃ‚Â£n phÃƒÂ¡Ã‚ÂºÃ‚Â©m khÃƒÆ’Ã‚Â´ng hÃƒÂ¡Ã‚Â»Ã‚Â£p lÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¡' });
+                return res.status(400).json({ success: false, message: 'Id sản phẩm không hợp lệ' });
             }
 
             try {
                 const product = await Product.findByIdAndDelete(req.params.id);
                 if (product) {
                     logProductDelete(req.user?.id || 'unknown', req.user?.email || 'unknown', req.params.id, product.title_vi || product.title);
-                    return res.json({ success: true, message: 'XÃƒÂ³a sÃ¡ÂºÂ£n phÃ¡ÂºÂ©m thÃƒÂ nh cÃƒÂ´ng', product });
+                    return res.json({ success: true, message: 'Xóa sản phẩm thành công', product });
                 }
             } catch (e) { }
 
-            return res.status(404).json({ success: false, message: 'SÃ¡ÂºÂ£n phÃ¡ÂºÂ©m khÃƒÂ´ng tÃ¡Â»â€œn tÃ¡ÂºÂ¡i' });
+            return res.status(404).json({ success: false, message: 'Sản phẩm không tồn tại' });
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ success: false, message: 'LÃ¡Â»â€”i server' });
+            return res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     }
 });
