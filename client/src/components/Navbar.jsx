@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, canAccessAdmin } = useAuth();
   const { cart } = useCart();
   const { t, lang, setLang } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -16,7 +16,7 @@ export default function Navbar() {
   const isHome = location.pathname === '/';
 
   // Add scroll event listener to track when to solidify the navbar
-  useState(() => {
+  useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -41,6 +41,8 @@ export default function Navbar() {
               {t('nav.cart')} {totalItems > 0 && <span>({totalItems})</span>}
             </Link>
           </li>
+          {canAccessAdmin && <li><Link to="/admin" onClick={() => setOpen(false)}>{t('admin.title')}</Link></li>}
+          {canAccessAdmin && <li><Link to="/logs" onClick={() => setOpen(false)}>{t('logs.title')}</Link></li>}
         </ul>
       </div>
 

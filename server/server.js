@@ -9,6 +9,10 @@ try {
 
 const mongoose = require('mongoose');
 const { app, PORT, MONGO_URI, setDbConnected } = require('./app');
+const PasswordHasher = require('./PasswordHasher');
+const { ensureAdminUser } = require('./services/bootstrapAdmin');
+
+const hasher = new PasswordHasher(10);
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ MongoDB connected'))
@@ -19,6 +23,9 @@ mongoose.connect(MONGO_URI)
 mongoose.connection.on('connected', () => {
     setDbConnected(true);
     console.log('MongoDB connection readyState=1');
+    ensureAdminUser(hasher).catch((err) => {
+        console.warn('[bootstrapAdmin] Failed:', err && err.message);
+    });
 });
 
 mongoose.connection.on('disconnected', () => {
