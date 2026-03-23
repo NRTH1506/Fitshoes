@@ -162,45 +162,58 @@ module.exports = ({
                 if (order) {
                     console.log(`[DB] Đã update đơn hàng ${app_trans_id} thành SUCCESS`);
 
-                    let userEmail = '';
+                    let userEmail = "email_admin@example.com";
                     if (order.userId && mongoose.Types.ObjectId.isValid(order.userId)) {
                         const user = await User.findById(order.userId).select('email');
-                        if (user) userEmail = user.email;
+                        if (user && user.email) userEmail = user.email;
                     }
-                    if (userEmail && GMAIL_REFRESH_TOKEN) {
-                        sendEmailViaGmailAPI({
-                            to: userEmail,
-                            subject: `[FitShoes] Thanh toán thành công #${app_trans_id}`,
-                            text: [
-                                'Cam on ban da mua hang tai FitShoes.',
-                                `Ma don: ${app_trans_id}`,
-                                `So tien: ${new Intl.NumberFormat('vi-VN').format(amount)} VND`,
-                                'Trang thai: THANH CONG'
-                            ].join('\n')
-                        });
-                    }
-                    if (false) {
-                        let userEmail = "email_admin@example.com";
 
-                        if (order.userId && mongoose.Types.ObjectId.isValid(order.userId)) {
-                            const user = await User.findById(order.userId);
-                            if (user) userEmail = user.email;
-                        }
-
+                    if (userEmail && mailTransporter) {
                         const mailOptions = {
                             from: GMAIL_USER,
                             to: userEmail,
                             subject: `[FitShoes] Thanh toán thành công #${app_trans_id}`,
                             html: `
-                            <h2>Cảm ơn bạn đã mua hàng!</h2>
-                            <p>Mã đơn: <b>${app_trans_id}</b></p>
-                            <p>Số tiền: <b>${new Intl.NumberFormat('vi-VN').format(amount)} đ</b></p>
-                            <p>Trạng thái: <span style="color:green">THÀNH CÔNG</span></p>
-                        `
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 8px; overflow: hidden;">
+                                <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                                    <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 2px;">FITSHOES</h1>
+                                </div>
+                                <div style="padding: 30px; background-color: #ffffff;">
+                                    <h2 style="color: #333333; margin-top: 0;">Cảm ơn bạn đã mua hàng! 🎉</h2>
+                                    <p style="color: #555555; line-height: 1.6; font-size: 16px;">
+                                        Thanh toán của bạn qua ZaloPay đã được xác nhận. Chúng tôi đang chuẩn bị đơn hàng và sẽ giao đến bạn trong thời gian sớm nhất.
+                                    </p>
+                                    
+                                    <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #f3f4f6;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="padding-bottom: 10px; color: #6b7280;">Mã đơn:</td>
+                                                <td style="padding-bottom: 10px; text-align: right; font-weight: bold; color: #111827;">${app_trans_id}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-bottom: 10px; color: #6b7280;">Số tiền:</td>
+                                                <td style="padding-bottom: 10px; text-align: right; font-weight: bold; color: #111827; font-size: 18px;">${new Intl.NumberFormat('vi-VN').format(amount)} ₫</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="color: #6b7280;">Trạng thái:</td>
+                                                <td style="text-align: right;"><span style="background-color: #def7ec; color: #03543f; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 14px;">THÀNH CÔNG</span></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <div style="text-align: center; margin-top: 30px;">
+                                        <a href="${process.env.FE_ORIGINS?.split(',')[0] || 'http://localhost:5173'}/profile" style="background-color: #1a1a1a; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 16px;">Theo Dõi Đơn Hàng</a>
+                                    </div>
+                                </div>
+                                <div style="background-color: #f3f4f6; padding: 20px; text-align: center; color: #9ca3af; font-size: 13px;">
+                                    <p style="margin: 0;">© ${new Date().getFullYear()} FitShoes Store. All rights reserved.</p>
+                                </div>
+                            </div>
+                            `
                         };
 
                         mailTransporter.sendMail(mailOptions, (err, info) => {
-                            if (err) console.error("[Mail Error]", err);
+                            if (err) console.error("[Mail Error]", err.message || err);
                             else console.log("[Mail Sent]", info.response);
                         });
                     }

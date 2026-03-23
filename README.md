@@ -1,6 +1,6 @@
 # FitShoes
 
-FitShoes is a modern, full-stack e-commerce application for footwear, built with a React frontend and an Express/MongoDB backend. It features a premium UI inspired by top brands (Adidas mega-dropdowns, Nike-style shop pages), a comprehensive admin dashboard, advanced product filtering, per-size inventory management, ZaloPay payment integration, and an AI-powered shopping assistant.
+FitShoes is a modern, full-stack e-commerce application for footwear, built with a React frontend and an Express/MongoDB backend. It features a premium UI inspired by top brands, a comprehensive admin dashboard, advanced product filtering, per-size inventory management, ZaloPay payment integration, and an AI-powered shopping assistant.
 
 ## Tech Stack
 
@@ -13,15 +13,14 @@ FitShoes is a modern, full-stack e-commerce application for footwear, built with
 
 ## Key Features
 
-### 🛍️ User Experience
-- **Premium UI:** Adidas-style mega dropdown navigation and Nike-style shop rendering.
+###  User Experience
 - **Advanced Filtering:** Filter products by category (Running, Gym, Casual, etc.), gender, specific sizes, and active sales.
 - **Dynamic Product Pages:** Real-time stock checking per size, dynamic sale pricing, and interactive image galleries.
 - **Seamless Checkout:** Guest users are smoothly redirected to log in and automatically returned to their cart context.
 - **Profile Management:** Users can update details and upload custom avatars.
 - **AI Shopping Assistant:** Built-in AI chatbot to help users find the perfect fit and answer store questions.
 
-### 🛡️ Admin Dashboard
+###  Admin Dashboard
 - **Shop Management:** Full CRUD operations for products, including image uploads, categorizations, and detailed per-size inventory tracking (e.g., specific stock for size 40, size 41).
 - **Sale Campaigns:** Set global or product-specific sale prices and expirations easily. 
 - **Order Tracking:** Track revenue, search by transaction ID, filter by date/status, and update fulfillment status directly.
