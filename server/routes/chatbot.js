@@ -11,14 +11,7 @@ if (!GEMINI_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-(async () => {
-    try {
-        const result = await genAI.listModels();
-        result.models.forEach(m => console.log('[Available Model]', m.name));
-    } catch (err) {
-        console.error('[listModels error]', err.message);
-    }
-})();
+
 
 // --- 2. System Instructions template ---
 const SYSTEM_PROMPT_BASE = `You are a helpful AI assistant for FitShoes, a premium shoe e-commerce store. 
@@ -68,7 +61,7 @@ router.post('/chat', async (req, res) => {
 
         // Initialize model with Dynamic System Instructions
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.0-flash-lite",
             systemInstruction: dynamicSystemPrompt
         });
 
