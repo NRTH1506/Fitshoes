@@ -19,6 +19,7 @@ const { buildProductPayload, loadStaticProducts } = require('./utils/productUtil
 const {
     authenticateJWT,
     requireAdminAccess,
+    requireAdminRole,
     createAccessToken,
     sanitizeUser,
     normalizeEmail,
@@ -280,8 +281,11 @@ const adminRoutes = createAdminRoutes({
     fs,
     path,
     baseDir: __dirname,
+    User,
+    Order,
     authenticateJWT,
-    requireAdminAccess
+    requireAdminAccess,
+    requireAdminRole
 });
 
 app.use('/api', authRoutes);

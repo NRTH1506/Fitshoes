@@ -56,15 +56,21 @@ export default function LogsPage() {
         <p style={{ textAlign: 'center', fontSize: '1.4rem', color: '#666' }}>{t('logs.noLogs')}</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '.8rem' }}>
-          {logs.map((log, i) => (
+          {logs.map((log, i) => {
+            const ip = log.clientIp || log.data?.clientIp || '';
+            return (
             <div key={i} style={{ background: '#fff', padding: '1.2rem', borderRadius: '.6rem', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', fontSize: '1.2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '.3rem', flexWrap: 'wrap', gap: '.5rem' }}>
                 <span style={{ fontWeight: 600, color: 'var(--main-color)' }}>{log.type || 'log'}</span>
-                <span style={{ color: '#999', fontSize: '1.1rem' }}>{log.timestamp || ''}</span>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  {ip && <span style={{ fontSize: '1.1rem', color: '#667eea', fontFamily: 'monospace', background: '#f0f4ff', padding: '.1rem .5rem', borderRadius: '.3rem' }}>🌐 {ip}</span>}
+                  <span style={{ color: '#999', fontSize: '1.1rem' }}>{log.timestamp || ''}</span>
+                </div>
               </div>
               <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', color: '#333' }}>{typeof log.message === 'string' ? log.message : JSON.stringify(log, null, 2)}</pre>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

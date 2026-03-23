@@ -109,6 +109,42 @@ export const getLogs = (params = {}) => {
   return request(`/api/logs${qs ? `?${qs}` : ''}`);
 };
 
+// ─── Admin ────────────────────────────────────────────
+export const fetchAdminUsers = () =>
+  request('/api/admin/users');
+
+export const grantAdminAccess = (userId) =>
+  request(`/api/admin/users/${userId}/grant`, { method: 'PUT' });
+
+export const revokeAdminAccess = (userId) =>
+  request(`/api/admin/users/${userId}/revoke`, { method: 'PUT' });
+
+export const transferOwnership = (targetEmail) =>
+  request('/api/admin/transfer-ownership', { method: 'PUT', body: JSON.stringify({ targetEmail }) });
+
+export const fetchAdminOrders = (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.status) query.set('status', params.status);
+  if (params.search) query.set('search', params.search);
+  if (params.startDate) query.set('startDate', params.startDate);
+  if (params.endDate) query.set('endDate', params.endDate);
+  if (params.page) query.set('page', String(params.page));
+  if (params.limit) query.set('limit', String(params.limit));
+  const qs = query.toString();
+  return request(`/api/admin/orders${qs ? `?${qs}` : ''}`);
+};
+
+export const fetchRevenue = (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.startDate) query.set('startDate', params.startDate);
+  if (params.endDate) query.set('endDate', params.endDate);
+  const qs = query.toString();
+  return request(`/api/admin/revenue${qs ? `?${qs}` : ''}`);
+};
+
+export const updateOrderStatus = (orderId, status) =>
+  request(`/api/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
+
 // ─── Aliases (used by page components) ────────────────
 export { getProducts as fetchProducts };
 export { login as loginUser };
