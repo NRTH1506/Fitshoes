@@ -179,7 +179,7 @@ module.exports = ({
                                     <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 2px;">FITSHOES</h1>
                                 </div>
                                 <div style="padding: 30px; background-color: #ffffff;">
-                                    <h2 style="color: #333333; margin-top: 0;">Cảm ơn bạn đã mua hàng! 🎉</h2>
+                                    <h2 style="color: #333333; margin-top: 0;">Cảm ơn bạn đã mua hàng! </h2>
                                     <p style="color: #555555; line-height: 1.6; font-size: 16px;">
                                         Thanh toán của bạn qua ZaloPay đã được xác nhận. Chúng tôi đang chuẩn bị đơn hàng và sẽ giao đến bạn trong thời gian sớm nhất.
                                     </p>
