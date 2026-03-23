@@ -1,7 +1,3 @@
-/***********************************************************
-    Utility Classes Start 
-************************************************************/
-
 .max-width-center {
     max-width: 1300px;
     margin-inline: auto;
@@ -53,7 +49,7 @@
 
 .primary-btn {
     background-color: var(--primary-color);
-    color: var(--white); /* ensure anchor buttons like 'Mua ngay' have white text */
+    color: var(--white);
 }
 
 @media (hover:hover) {
@@ -81,7 +77,3 @@
 .padding-inline {
     padding-inline: 2%;
 }
-
-/***********************************************************
-    Utility Classes End
-************************************************************/

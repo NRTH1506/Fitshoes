@@ -17,7 +17,7 @@ async function ensureAdminUser(hasher) {
   let user = await User.findOne({ email: adminEmail });
 
   if (!user) {
-    // Create admin user — passwordHash may be empty for Google OAuth users
+    // Create admin user — passwordHash
     try {
       const passwordHash = await hasher.hashPassword(adminPassword);
       user = await User.create({
@@ -34,7 +34,6 @@ async function ensureAdminUser(hasher) {
     return;
   }
 
-  // User exists — ensure admin privileges
   let changed = false;
 
   if (user.role !== 'admin') {

@@ -8,11 +8,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { showToast } from '../utils/toast';
 
 const CATEGORIES = [
-  { key: 'running', label: 'Running', icon: '🏃' },
-  { key: 'gym', label: 'Training & Gym', icon: '💪' },
-  { key: 'casual', label: 'Casual', icon: '👟' },
-  { key: 'sandals', label: 'Sandals', icon: '🩴' },
-  { key: 'boots', label: 'Boots', icon: '🥾' },
+  { key: 'running', label: 'Running' },
+  { key: 'gym', label: 'Training & Gym' },
+  { key: 'casual', label: 'Casual' },
+  { key: 'sandals', label: 'Sandals' },
+  { key: 'boots', label: 'Boots' },
 ];
 
 const GENDERS = [
@@ -227,7 +227,7 @@ export default function ShopPage() {
                     </h4>
                     <div className="product-actions">
                       <Link to={`/product/${p.id || p._id}`} style={{ color: '#667eea', fontSize: '1.2rem', fontWeight: 600 }}>{t('shop.viewDetail')}</Link>
-                      <button onClick={() => { addToCart(p, 1, '40'); showToast(`✅ ${t('shop.addToCart')}`); }}
+                      <button onClick={() => { addToCart(p, 1, '40'); showToast(` ${t('shop.addToCart')}`); }}
                         style={{ background: 'var(--main-color)', color: '#fff', padding: '.5rem 1rem', border: 'none', borderRadius: '.5rem', cursor: 'pointer', fontSize: '1.2rem' }}>
                         <i className="fa fa-cart-plus"></i> {t('shop.addToCart')}
                       </button>

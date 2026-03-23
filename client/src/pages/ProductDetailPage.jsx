@@ -29,7 +29,7 @@ export default function ProductDetailPage() {
         setMainImg(resolveImagePath((found.images && found.images.length) ? found.images[0] : ''));
         document.title = `${found.title_vi} — FitShoes`;
       }
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(() => { }).finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return <section style={{ padding: '3rem 5%', textAlign: 'center' }}><p style={{ fontSize: '1.4rem' }}>{t('product.loading')}</p></section>;
@@ -59,7 +59,7 @@ export default function ProductDetailPage() {
     if (!selectedSize) { alert(t('product.pleaseSelectSize')); return; }
     if (maxQty <= 0) { alert('This size is out of stock'); return; }
     addToCart({ ...product, price: displayPrice }, qty, selectedSize);
-    showToast(`✅ ${t('product.addedToCart', { name: product.title_vi, qty })}`);
+    showToast(`${t('product.addedToCart', { name: product.title_vi, qty })}`);
   }
 
   // Button styles for +/-

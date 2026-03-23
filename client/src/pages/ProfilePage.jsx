@@ -52,7 +52,7 @@ export default function ProfilePage() {
     try {
       const res = await updateProfile({ userId: user._id || user.id, ...form });
       if (res.data?.user) login(res.data.user);
-      setMsg({ text: '✅ ' + t('common.success'), isError: false });
+      setMsg({ text: t('common.success'), isError: false });
       setEditing(false);
     } catch (err) {
       setMsg({ text: err.response?.data?.message || 'Error', isError: true });
@@ -62,7 +62,7 @@ export default function ProfilePage() {
   async function handleFileChange(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     setUploading(true);
     const formData = new FormData();
     formData.append('avatar', file);
@@ -72,7 +72,7 @@ export default function ProfilePage() {
       const res = await uploadAvatar(formData);
       if (res.success && res.user) {
         login(res.user);
-        setMsg({ text: '✅ ' + t('profile.avatarUpdated'), isError: false });
+        setMsg({ text: t('profile.avatarUpdated'), isError: false });
       }
     } catch (err) {
       setMsg({ text: 'Error uploading image', isError: true });
@@ -96,16 +96,16 @@ export default function ProfilePage() {
           <div className="profile-header-content">
             <div className="profile-avatar" style={{ position: 'relative', overflow: 'hidden' }}>
               {user.avatar ? (
-                <img 
-                  src={user.avatar.startsWith('http') ? user.avatar : (import.meta.env.VITE_API_URL || '') + user.avatar} 
-                  alt="avatar" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                <img
+                  src={user.avatar.startsWith('http') ? user.avatar : (import.meta.env.VITE_API_URL || '') + user.avatar}
+                  alt="avatar"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : '👤'}
-              <label style={{ 
-                position: 'absolute', bottom: 0, left: 0, right: 0, 
-                background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: '.9rem', 
-                padding: '.2rem', cursor: 'pointer', textAlign: 'center' 
+              <label style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0,
+                background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: '.9rem',
+                padding: '.2rem', cursor: 'pointer', textAlign: 'center'
               }}>
                 {uploading ? '...' : t('profile.upload')}
                 <input type="file" hidden onChange={handleFileChange} accept="image/*" />
@@ -148,13 +148,13 @@ export default function ProfilePage() {
                           </div>
                         </div>
                         <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '.5rem' }}>
-                          <div style={{ 
-                            display: 'inline-block', 
-                            padding: '.3rem .8rem', 
-                            borderRadius: '1rem', 
-                            fontSize: '1.1rem', 
-                            fontWeight: 700, 
-                            background: getStatusColor(order.status) + '15', 
+                          <div style={{
+                            display: 'inline-block',
+                            padding: '.3rem .8rem',
+                            borderRadius: '1rem',
+                            fontSize: '1.1rem',
+                            fontWeight: 700,
+                            background: getStatusColor(order.status) + '15',
                             color: getStatusColor(order.status),
                             border: `1px solid ${getStatusColor(order.status)}33`
                           }}>
@@ -165,7 +165,7 @@ export default function ProfilePage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {expandedOrder === order._id && (
                         <div className="order-details" style={{ padding: '1.5rem', background: '#f9f9f9', borderTop: '1px solid #eee' }}>
                           <h4 style={{ fontSize: '1.4rem', marginBottom: '1.2rem', color: '#444', borderBottom: '2px solid #eee', paddingBottom: '.5rem' }}>{t('profile.itemsBought')}</h4>

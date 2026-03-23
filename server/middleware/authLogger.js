@@ -1,4 +1,4 @@
-// server/middleware/authLogger.js - Authentication and security logging
+
 
 const Logger = require('../Logger');
 const authLogger = new Logger('authentication.log');
@@ -38,9 +38,9 @@ function logOtpVerification(email, success) {
   });
 }
 
-module.exports = { 
-  logLoginAttempt, 
-  logAccessDenied, 
+module.exports = {
+  logLoginAttempt,
+  logAccessDenied,
   logPasswordChange,
   logOtpVerification
 };

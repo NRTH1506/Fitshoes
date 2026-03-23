@@ -1,9 +1,4 @@
-/***********************************************************
-  Responsive Styles for Page Components
-  Handles inline-grid layouts that need to stack on mobile
-************************************************************/
-
-/* ─── Product Detail Page ─────────────────────────────── */
+/* Product Detail Page */
 .product-detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -11,7 +6,7 @@
   align-items: start;
 }
 
-/* ─── Cart Page ───────────────────────────────────────── */
+/*  Cart Page */
 .cart-grid {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -19,14 +14,14 @@
   align-items: start;
 }
 
-/* ─── Admin Page ──────────────────────────────────────── */
+/* Admin Page */
 .admin-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
 }
 
-/* ─── Service Detail Page ─────────────────────────────── */
+/* Service Detail Page  */
 .service-detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -34,14 +29,14 @@
   align-items: center;
 }
 
-/* ─── Footer ──────────────────────────────────────────── */
+/* Footer  */
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
 }
 
-/* ─── Cart Item Row ───────────────────────────────────── */
+/* Cart Item Row  */
 .cart-item-row {
   display: flex;
   justify-content: space-between;
@@ -49,7 +44,7 @@
   background: #fff;
   padding: 1.5rem;
   border-radius: .8rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .cart-item-actions {
@@ -58,14 +53,14 @@
   gap: 1rem;
 }
 
-/* ─── Gallery Thumbs ──────────────────────────────────── */
+/*Gallery Thumbs */
 .gallery-thumbs-row {
   display: flex;
   gap: .8rem;
   flex-wrap: wrap;
 }
 
-/* ─── Product Actions (Shop Page) ─────────────────────── */
+/* Product Actions (Shop Page) */
 .product-actions {
   display: flex;
   gap: 1rem;
@@ -73,12 +68,9 @@
   flex-wrap: wrap;
 }
 
-/*
- * ─────────────────────────────────────────────────────────
- * Tablet Breakpoint (≤ 960px)
- * ─────────────────────────────────────────────────────────
- */
+/* Tablet */
 @media (max-width: 960px) {
+
   .product-detail-grid,
   .service-detail-grid {
     grid-template-columns: 1fr;
@@ -98,11 +90,7 @@
   }
 }
 
-/*
- * ─────────────────────────────────────────────────────────
- * Mobile Breakpoint (≤ 640px)
- * ─────────────────────────────────────────────────────────
- */
+/* Mobile */
 @media (max-width: 640px) {
   .footer-grid {
     grid-template-columns: 1fr;
@@ -128,23 +116,18 @@
     flex-direction: column;
   }
 
-  .product-actions > * {
+  .product-actions>* {
     width: 100%;
     text-align: center;
     justify-content: center;
   }
 
-  /* Ensure filter buttons wrap nicely */
   .grid-4-columns {
     grid-template-columns: 1fr 1fr !important;
   }
 }
 
-/*
- * ─────────────────────────────────────────────────────────
- * Small Mobile (≤ 480px)
- * ─────────────────────────────────────────────────────────
- */
+/* Small Mobile */
 @media (max-width: 480px) {
   .grid-4-columns {
     grid-template-columns: 1fr !important;

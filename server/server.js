@@ -2,9 +2,9 @@ const path = require('path');
 
 try {
     require('dotenv').config({ path: path.join(__dirname, '.env') });
-    console.log('✅ .env loaded successfully');
+    console.log(' .env loaded successfully');
 } catch (e) {
-    console.warn('⚠️ dotenv initialization failed:', e && e.message);
+    console.warn(' dotenv initialization failed:', e && e.message);
 }
 
 const mongoose = require('mongoose');
@@ -15,9 +15,9 @@ const { ensureAdminUser } = require('./services/bootstrapAdmin');
 const hasher = new PasswordHasher(10);
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log('✅ MongoDB connected'))
+    .then(() => console.log(' MongoDB connected'))
     .catch(err => {
-        console.warn('⚠️ MongoDB connection error (continuing with static fallback):', err && err.message);
+        console.warn(' MongoDB connection error (continuing with static fallback):', err && err.message);
     });
 
 mongoose.connection.on('connected', () => {
@@ -33,4 +33,4 @@ mongoose.connection.on('disconnected', () => {
     console.log('MongoDB disconnected');
 });
 
-app.listen(PORT, () => console.log(`🚀 API Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(` API Server running at http://localhost:${PORT}`));

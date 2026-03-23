@@ -3,7 +3,7 @@ const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Product = require('../models/Product');
 
-// --- 1. Gemini API setup ---
+// Gemini API setup 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
     console.error('⚠️ WARNING: GEMINI_API_KEY not found in environment variables');
@@ -11,15 +11,14 @@ if (!GEMINI_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-// --- 2. Free-tier models ordered by quota availability ---
 const FREE_MODELS = [
-    'gemini-3.1-flash-lite',   // 15 RPM, 500 RPD — best free quota
-    'gemini-2.5-flash-lite',   // 10 RPM, 20 RPD
-    'gemini-3.0-flash',        // 5 RPM, 20 RPD
-    'gemini-2.5-flash',        // 5 RPM, 20 RPD
+    'gemini-3.1-flash-lite',
+    'gemini-2.5-flash-lite',
+    'gemini-3.0-flash',
+    'gemini-2.5-flash',
 ];
 
-// Track which model to use (start with best)
+
 let currentModelIndex = 0;
 
 function getCurrentModelName() {
@@ -32,7 +31,7 @@ function rotateModel() {
     return getCurrentModelName();
 }
 
-// --- 3. System Instructions template ---
+// System Instructions template 
 const SYSTEM_PROMPT_BASE = `You are a helpful AI assistant for FitShoes, a premium shoe e-commerce store. 
 
 Your responsibilities:
@@ -52,7 +51,6 @@ Guidelines:
 // Store conversation history in memory
 const conversationHistory = {};
 
-// --- 4. Helper: try sending message with automatic model fallback ---
 async function sendWithFallback(dynamicSystemPrompt, history, message, retriesLeft = FREE_MODELS.length) {
     const modelName = getCurrentModelName();
     console.log(`[Chatbot] Using model: ${modelName}`);
@@ -71,17 +69,17 @@ async function sendWithFallback(dynamicSystemPrompt, history, message, retriesLe
         const result = await chat.sendMessage(message);
         return result.response.text();
     } catch (error) {
-        // On 429 (quota) or 404 (model not found), try the next model
+
         if ((error.status === 429 || error.status === 404) && retriesLeft > 1) {
             console.warn(`[Chatbot] Model ${modelName} failed (${error.status}), rotating...`);
             rotateModel();
             return sendWithFallback(dynamicSystemPrompt, history, message, retriesLeft - 1);
         }
-        throw error; // All models exhausted or different error
+        throw error;
     }
 }
 
-// --- 5. Chat endpoint ---
+// Chat endpoint
 router.post('/chat', async (req, res) => {
     try {
         const { message, userId, isAdmin } = req.body;
@@ -90,7 +88,6 @@ router.post('/chat', async (req, res) => {
             return res.status(400).json({ error: 'Message is required' });
         }
 
-        // --- Fetch LIVE product data from MongoDB ---
         let currentProducts = [];
         try {
             currentProducts = await Product.find({}).lean();
@@ -129,7 +126,6 @@ router.post('/chat', async (req, res) => {
         conversationHistory[userId].push({ role: 'user', content: message });
         conversationHistory[userId].push({ role: 'assistant', content: assistantMessage });
 
-        // Return 'reply' to match frontend ChatbotWidget.jsx
         res.json({
             success: true,
             reply: assistantMessage,
@@ -142,11 +138,11 @@ router.post('/chat', async (req, res) => {
 
         let errorMessage = 'Failed to process chat message';
         if (error.message && error.message.includes('API_KEY_INVALID')) {
-            errorMessage = '❌ API Key Gemini không hợp lệ.';
+            errorMessage = ' API Key Gemini không hợp lệ.';
         } else if (error.status === 429) {
-            errorMessage = '⏳ Tất cả model đều hết hạn mức. Vui lòng thử lại sau vài phút.';
+            errorMessage = ' Tất cả model đều hết hạn mức. Vui lòng thử lại sau vài phút.';
         } else if (error.status === 404) {
-            errorMessage = '❌ Không tìm thấy model AI phù hợp.';
+            errorMessage = ' Không tìm thấy model AI phù hợp.';
         }
 
         res.status(500).json({
@@ -157,7 +153,7 @@ router.post('/chat', async (req, res) => {
     }
 });
 
-// --- 6. Clear chat history ---
+// Clear chat history
 router.post('/chat/clear', (req, res) => {
     const { userId } = req.body;
     if (conversationHistory[userId]) {

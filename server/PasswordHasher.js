@@ -1,7 +1,6 @@
-// Import thư viện bcrypt — chuyên dùng để mã hoá (hash) mật khẩu
 const bcrypt = require('bcrypt');
 
-// Định nghĩa class PasswordHasher để gom tất cả logic hash & verify password
+
 class PasswordHasher {
   /**
    * Hàm khởi tạo (constructor)
@@ -34,5 +33,4 @@ class PasswordHasher {
   }
 }
 
-// Xuất class ra ngoài để các file khác (AuthService.js, server.js, ...) có thể sử dụng
 module.exports = PasswordHasher;

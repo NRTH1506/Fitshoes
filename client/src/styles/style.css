@@ -1,12 +1,8 @@
-/**********************************************************
-  Add Google Fonts
-**********************************************************/
+/* Google font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Be+Vietnam+Pro:wght@400;600;800&display=swap');
 
 
-/**********************************************************
-  Reset Default Properties Start
-**********************************************************/
+
 *,
 *::before,
 *::after {
@@ -43,9 +39,7 @@ body {
     overflow-x: hidden;
 }
 
-/**********************************************************
-    Variables Start
-**********************************************************/
+
 :root {
 
     /* Theme Colors */
@@ -63,22 +57,18 @@ body {
     --font-family-2: 'Be Vietnam Pro', sans-serif;
 }
 
-/**********************************************************
-    Variables End
-**********************************************************/
 
 
 
-/**********************************************************
-  Common Properties to Frequently Used Elements Start
-**********************************************************/
+
+
 body {
-    /* Following Properties Will be Inherited by All the Elements */
-    /* Make text readable: remove global uppercase and use a clear humanist sans */
+
     text-transform: none;
     font-family: var(--font-family-1);
     color: var(--text-color);
-    font-size: 1.6rem; /* base readable size (16px) */
+    font-size: 1.6rem;
+    /* base readable size (16px) */
     line-height: 1.5;
 }
 
@@ -135,28 +125,14 @@ p {
     word-spacing: .08rem;
 }
 
-/**********************************************************
-    Common Properties to Frequently Used Elements End
-**********************************************************/
 
-
-/***********************************************************************************************
-  Actual Document Styling Start
-***********************************************************************************************/
-
-
-/**********************************************************
-  Wrapper Start
-**********************************************************/
 .wrapper {
     width: 100vw;
     height: auto;
 }
 
 
-/**********************************************************
-  Header Start
-**********************************************************/
+
 header {
     width: 100%;
     background-image: linear-gradient(135deg, rgba(21, 51, 86, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%), url(/assets/images/hero-3.jpg);
@@ -169,9 +145,7 @@ header {
 
 
 
-/**********************************************************
-  Nav Start
-**********************************************************/
+
 nav {
     padding-block: 1.5rem;
     position: relative;
@@ -181,9 +155,7 @@ nav {
 }
 
 
-/**********************************************************
-  Logo
-**********************************************************/
+
 .logo-box img {
     height: 5rem;
 }
@@ -199,9 +171,7 @@ nav {
 }
 
 
-/**********************************************************
-  Nav Links
-**********************************************************/
+
 .nav-links ul {
     gap: 3.5rem;
 }
@@ -215,7 +185,7 @@ nav {
     transition: all 0.3s ease;
 }
 
-/* Dark Navbar Theme (for pages other than Home) */
+
 nav.nav-dark {
     background: var(--white);
     border-bottom: 1px solid #eaeaea;
@@ -240,7 +210,7 @@ nav.nav-dark {
     color: var(--white);
 }
 
-/* Let the nav links naturally flow in the flex container */
+
 .nav-links {
     flex: 1;
     display: flex;
@@ -250,14 +220,14 @@ nav.nav-dark {
 
 /* Responsive fallback */
 @media (max-width: 900px) {
-    .nav-links ul { gap: 1.6rem; }
+    .nav-links ul {
+        gap: 1.6rem;
+    }
 }
 
 
 
-/**********************************************************
-  Toggle Button
-**********************************************************/
+
 .mobile-toggle-btn {
     font-size: 2.5rem;
     color: var(--white);
@@ -265,9 +235,7 @@ nav.nav-dark {
 }
 
 
-/**********************************************************
-  Social Media Iocns
-**********************************************************/
+
 nav .social-media-icons {
     gap: 2.2rem;
 }
@@ -330,14 +298,7 @@ nav .social-media-icons a {
     }
 }
 
-/**********************************************************
-  Nav End
-**********************************************************/
 
-
-/**********************************************************
-  Hero Text Start
-**********************************************************/
 #hero-text {
     min-height: 90vh;
     padding-top: 100px;
@@ -428,19 +389,7 @@ nav .social-media-icons a {
     }
 }
 
-/**********************************************************
-  Hero Text End
-**********************************************************/
 
-/**********************************************************
-  Header End
-**********************************************************/
-
-
-
-/**********************************************************
-   Services Section Start
-**********************************************************/
 
 #services-section {
     gap: 2rem;
@@ -456,9 +405,9 @@ nav .social-media-icons a {
     background-color: var(--white);
     cursor: pointer;
     border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
 
@@ -520,24 +469,18 @@ nav .social-media-icons a {
     .service-box .service-btn:hover {
         color: var(--main-color);
     }
+
     .service-box:hover .service-icon {
         transform: scale(1.1) rotate(5deg);
         color: var(--primary-color);
         background: linear-gradient(135deg, rgba(0, 0, 255, 0.1), transparent);
     }
+
     .service-box:hover .service-btn i {
         transform: translateX(5px);
     }
 }
 
-/**********************************************************
-   Services Section End
-**********************************************************/
-
-
-/**********************************************************
-   Offer Section Start
-**********************************************************/
 .offer-content {
     background-color: rgb(238, 238, 238);
     padding: 5rem;
@@ -577,9 +520,6 @@ nav .social-media-icons a {
 }
 
 
-/**********************************************************
-   Offer Section Countdown
-**********************************************************/
 .offer-content .countdown {
     gap: 1.5rem;
 }
@@ -634,15 +574,7 @@ nav .social-media-icons a {
     height: 100%;
 }
 
-/**********************************************************
-   Offer Section End
-**********************************************************/
 
-
-
-/**********************************************************
-   Shoes Cards Row Start
-**********************************************************/
 .shoes-card {
     min-height: 25rem;
     padding: 3rem;
@@ -663,7 +595,7 @@ nav .social-media-icons a {
         border-color: transparent;
         border-radius: 12px;
     }
-    
+
     .shoes-card:hover>img {
         transform: scale(1.1) translateY(-5px);
     }
@@ -675,7 +607,7 @@ nav .social-media-icons a {
     transform: scale(1);
     transition: transform 0.5s ease;
     object-fit: contain;
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
 }
 
 
@@ -701,13 +633,7 @@ nav .social-media-icons a {
     font-weight: 400;
 }
 
-/**********************************************************
-   Shoes Cards Row End
-**********************************************************/
 
-/**********************************************************
-   Three Banner Section Start
-**********************************************************/
 #three-banner-section {
     display: grid;
     grid-template-columns: 25% 25% 50%;
@@ -725,12 +651,12 @@ nav .social-media-icons a {
     border-radius: 12px;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .three-banner-1,
 .three-banner-3 {
-    background-image: linear-gradient(135deg, rgba(21,51,86,0.8), rgba(102,126,234,0.6)), url("/assets/images/gallery-1.jpg");
+    background-image: linear-gradient(135deg, rgba(21, 51, 86, 0.8), rgba(102, 126, 234, 0.6)), url("/assets/images/gallery-1.jpg");
     background-size: cover;
     background-position: center;
     transition: transform 0.4s ease;
@@ -787,7 +713,7 @@ nav .social-media-icons a {
 }
 
 .three-banner-3 {
-    background-image: linear-gradient(to right, rgba(0,0,0,0.8), rgba(21,51,86,0.4)), url("/assets/images/girl-music-1.jpg");
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(21, 51, 86, 0.4)), url("/assets/images/girl-music-1.jpg");
 }
 
 .three-banner-3 h1 {
@@ -797,17 +723,10 @@ nav .social-media-icons a {
     font-size: 4.5rem;
     margin-bottom: 2rem;
     line-height: 1.2;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/**********************************************************
-   Three Banner Section End
-**********************************************************/
 
-
-/**********************************************************
-   Biggest Sale Section Start
-**********************************************************/
 #biggest-sale-section {
     padding: 6rem 5% 4rem;
     background-color: var(--white);
@@ -844,14 +763,7 @@ nav .social-media-icons a {
     margin-inline: auto;
 }
 
-/**********************************************************
-   Biggest Sale Section End
-**********************************************************/
 
-
-/**********************************************************
-   Gallery Section Start
-**********************************************************/
 .gallery-box {
     height: 30rem;
     background-image: url("/assets/images/gallery-1.jpg");
@@ -877,15 +789,15 @@ nav .social-media-icons a {
     .gallery-box:hover::before {
         background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
     }
-    
+
     .gallery-box {
         transition: transform 0.5s ease;
     }
-    
+
     .gallery-box:hover {
         z-index: 10;
         transform: scale(1.05);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 }
 
@@ -917,14 +829,7 @@ nav .social-media-icons a {
     background-image: url("/assets/images/gallery-1.jpg");
 }
 
-/**********************************************************
-   Gallery Section End
-**********************************************************/
 
-
-/**********************************************************
-   Brands Section Start
-**********************************************************/
 #brands-section {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -941,8 +846,8 @@ nav .social-media-icons a {
     background: #fff;
     cursor: pointer;
     border-radius: 8px;
-    border: 1px solid rgba(0,0,0,0.03);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
     transition: all 0.3s ease;
 }
 
@@ -957,24 +862,18 @@ nav .social-media-icons a {
 
 @media (hover:hover) {
     .brand-box:hover {
-        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-        border-color: rgba(0,0,255,0.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+        border-color: rgba(0, 0, 255, 0.1);
         transform: translateY(-5px);
     }
+
     .brand-box:hover img {
         transform: scale(1.15);
         filter: grayscale(0%) opacity(1);
     }
 }
 
-/**********************************************************
-   Brands Section End
-**********************************************************/
 
-
-/********************************************************** 
-  Footer Start
-**********************************************************/
 footer {
     background-color: var(--grey-color);
     padding-block: 6rem;
@@ -1054,18 +953,19 @@ footer {
     .nav-links {
         position: fixed;
         top: 0;
-        left: -100%; /* Hidden by default */
+        left: -100%;
+        /* Hidden by default */
         width: 300px;
         height: 100vh;
         background-color: var(--white);
-        box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+        box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
         z-index: 1000;
         transition: left 0.4s ease;
         flex-direction: column;
         justify-content: flex-start;
         padding-top: 8rem;
     }
-    
+
     /* When 'open' style applies, left becomes 0 */
     .nav-links[style*="max-width: 300px"] {
         left: 0 !important;
@@ -1097,13 +997,7 @@ footer {
     }
 }
 
-/********************************************************** 
-  Footer End
-**********************************************************/
 
-/**********************************************************
-  Profile Page Styling Start
-**********************************************************/
 
 .profile-container {
     max-width: 1000px;
@@ -1117,6 +1011,7 @@ footer {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1262,6 +1157,7 @@ footer {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1489,13 +1385,7 @@ footer {
     }
 }
 
-/**********************************************************
-  Profile Page Styling End
-**********************************************************/
 
-/**********************************************************
-  Authentication Pages Styling Start
-**********************************************************/
 
 .auth-body {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -1535,6 +1425,7 @@ footer {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1560,9 +1451,12 @@ footer {
 }
 
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px);
     }
+
     50% {
         transform: translateY(-20px);
     }
@@ -1822,6 +1716,7 @@ footer {
 
 /* Responsive */
 @media (max-width: 960px) {
+
     .auth-container,
     .auth-container.auth-register {
         grid-template-columns: 1fr;
@@ -1893,13 +1788,7 @@ footer {
     }
 }
 
-/**********************************************************
-  Authentication Pages Styling End
-**********************************************************/
 
-/**********************************************************
-  OTP Verification Page Styling Start
-**********************************************************/
 
 .otp-body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1949,9 +1838,12 @@ footer {
 }
 
 @keyframes bounce {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-15px);
     }
@@ -2149,6 +2041,7 @@ footer {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -2302,116 +2195,272 @@ footer {
     }
 }
 
-/**********************************************************
-  OTP Verification Page Styling End
-**********************************************************/
 
-/**********************************************************
-  Mega Dropdown (Adidas-style) Start
-**********************************************************/
-.nav-dropdown-trigger { position: relative; }
+.nav-dropdown-trigger {
+    position: relative;
+}
 
 .mega-dropdown {
-    position: fixed; top: 75px; left: 0; width: 100%;
-    background: #fff; box-shadow: 0 15px 40px rgba(0,0,0,.1);
-    opacity: 0; visibility: hidden; transform: translateY(-10px);
-    transition: all .3s cubic-bezier(.4,0,.2,1); z-index: 999;
+    position: fixed;
+    top: 75px;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, .1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all .3s cubic-bezier(.4, 0, .2, 1);
+    z-index: 999;
     border-top: 3px solid var(--main-color);
 }
-.mega-dropdown--open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.mega-dropdown--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
 
 .mega-dropdown__inner {
-    max-width: 1200px; margin: 0 auto; padding: 2.5rem 3rem;
-    display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2.5rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 3rem;
 }
-.mega-dropdown__col { display: flex; flex-direction: column; gap: .3rem; }
+
+.mega-dropdown__col {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
 
 .mega-dropdown__heading {
-    font-size: 1.3rem; font-weight: 800; text-transform: uppercase;
-    letter-spacing: .08em; color: #111; margin-bottom: .8rem;
-    padding-bottom: .5rem; border-bottom: 2px solid #f0f0f0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #111;
+    margin-bottom: .8rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid #f0f0f0;
 }
-.mega-dropdown__link {
-    background: none; border: none; text-align: left; padding: .6rem .8rem;
-    font-size: 1.3rem; color: #444; cursor: pointer; border-radius: .4rem;
-    transition: all .15s; display: flex; align-items: center; gap: .5rem;
-}
-.mega-dropdown__link:hover { background: #f5f5f5; color: #111; transform: translateX(4px); }
-.mega-dropdown__link--sale { color: #dc2626; font-weight: 700; }
 
-.mega-dropdown__featured { display: flex; align-items: center; justify-content: center; }
+.mega-dropdown__link {
+    background: none;
+    border: none;
+    text-align: left;
+    padding: .6rem .8rem;
+    font-size: 1.3rem;
+    color: #444;
+    cursor: pointer;
+    border-radius: .4rem;
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.mega-dropdown__link:hover {
+    background: #f5f5f5;
+    color: #111;
+    transform: translateX(4px);
+}
+
+.mega-dropdown__link--sale {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.mega-dropdown__featured {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .mega-dropdown__featured-card {
-    background: linear-gradient(135deg,#667eea22,#764ba222);
-    border-radius: 1rem; padding: 2.5rem; text-align: center; width: 100%;
+    background: linear-gradient(135deg, #667eea22, #764ba222);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    text-align: center;
+    width: 100%;
 }
-.mega-dropdown__featured-card h4 { font-size: 1.6rem; color: #333; margin-bottom: .3rem; }
-.mega-dropdown__featured-card p { font-size: 1.2rem; color: #666; margin-bottom: 1rem; }
+
+.mega-dropdown__featured-card h4 {
+    font-size: 1.6rem;
+    color: #333;
+    margin-bottom: .3rem;
+}
+
+.mega-dropdown__featured-card p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 1rem;
+}
+
 .mega-dropdown__featured-btn {
-    background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; border: none;
-    padding: .7rem 1.5rem; border-radius: 2rem; font-weight: 700; font-size: 1.2rem;
-    cursor: pointer; transition: transform .2s;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    border: none;
+    padding: .7rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform .2s;
 }
-.mega-dropdown__featured-btn:hover { transform: scale(1.05); }
+
+.mega-dropdown__featured-btn:hover {
+    transform: scale(1.05);
+}
 
 .mega-dropdown__backdrop {
-    position: fixed; top: 78px; left: 0; width: 100%; height: 100vh;
-    background: rgba(0,0,0,.15); z-index: 998;
+    position: fixed;
+    top: 78px;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, .15);
+    z-index: 998;
 }
-/**********************************************************
-  Mega Dropdown End
-**********************************************************/
 
-/**********************************************************
-  Product Card Overlay + Shop Sidebar Start
-**********************************************************/
 .product-actions {
-    display: flex; gap: .8rem; align-items: center; justify-content: space-between;
-    margin-top: .8rem; padding-top: .5rem; border-top: 1px solid #f0f0f0;
-    opacity: 0; transform: translateY(8px); transition: all .3s ease;
+    display: flex;
+    gap: .8rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: .8rem;
+    padding-top: .5rem;
+    border-top: 1px solid #f0f0f0;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all .3s ease;
 }
-@media (hover:hover) { .shoes-card:hover .product-actions { opacity: 1; transform: translateY(0); } }
-@media (hover:none) { .product-actions { opacity: 1; transform: none; } }
 
-.shop-layout { display: grid; grid-template-columns: 250px 1fr; gap: 2rem; align-items: start; }
+@media (hover:hover) {
+    .shoes-card:hover .product-actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (hover:none) {
+    .product-actions {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.shop-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
 .shop-sidebar {
-    position: sticky; top: 100px; background: #fff; border-radius: .8rem;
-    padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,.04);
-    max-height: calc(100vh - 120px); overflow-y: auto;
+    position: sticky;
+    top: 100px;
+    background: #fff;
+    border-radius: .8rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .04);
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
 }
-.shop-sidebar__section { margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
-.shop-sidebar__section:last-child { border-bottom: none; margin-bottom: 0; }
+
+.shop-sidebar__section {
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.shop-sidebar__section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
 .shop-sidebar__heading {
-    font-size: 1.3rem; font-weight: 700; color: #111; margin-bottom: .6rem;
-    display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: .6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
 }
-.shop-sidebar__heading .chevron { transition: transform .2s; font-size: 1rem; }
-.shop-sidebar__heading .chevron.open { transform: rotate(180deg); }
-.shop-sidebar__list { display: flex; flex-direction: column; gap: .2rem; }
+
+.shop-sidebar__heading .chevron {
+    transition: transform .2s;
+    font-size: 1rem;
+}
+
+.shop-sidebar__heading .chevron.open {
+    transform: rotate(180deg);
+}
+
+.shop-sidebar__list {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+}
+
 .shop-sidebar__item {
-    background: none; border: none; text-align: left; padding: .5rem .7rem;
-    font-size: 1.2rem; color: #555; cursor: pointer; border-radius: .3rem; transition: all .15s;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: .5rem .7rem;
+    font-size: 1.2rem;
+    color: #555;
+    cursor: pointer;
+    border-radius: .3rem;
+    transition: all .15s;
 }
-.shop-sidebar__item:hover, .shop-sidebar__item.active { background: #f5f5f5; color: #111; font-weight: 600; }
-.shop-sidebar__item.active { color: var(--main-color); background: rgba(102,126,234,.08); }
+
+.shop-sidebar__item:hover,
+.shop-sidebar__item.active {
+    background: #f5f5f5;
+    color: #111;
+    font-weight: 600;
+}
+
+.shop-sidebar__item.active {
+    color: var(--main-color);
+    background: rgba(102, 126, 234, .08);
+}
 
 .product-sale-badge {
-    position: absolute; top: .8rem; left: .8rem; background: #dc2626;
-    color: #fff; padding: .2rem .6rem; border-radius: .3rem; font-size: 1.1rem;
-    font-weight: 700; z-index: 3; letter-spacing: .02em;
+    position: absolute;
+    top: .8rem;
+    left: .8rem;
+    background: #dc2626;
+    color: #fff;
+    padding: .2rem .6rem;
+    border-radius: .3rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    z-index: 3;
+    letter-spacing: .02em;
 }
 
 @media (max-width: 768px) {
-    .shop-layout { grid-template-columns: 1fr; }
-    .shop-sidebar { position: static; max-height: none; }
-    .mega-dropdown__inner { grid-template-columns: 1fr; padding: 1.5rem; }
-    .mega-dropdown__featured { display: none; }
+    .shop-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .shop-sidebar {
+        position: static;
+        max-height: none;
+    }
+
+    .mega-dropdown__inner {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+    }
+
+    .mega-dropdown__featured {
+        display: none;
+    }
 }
-/**********************************************************
-  Product Card Overlay + Shop Sidebar End
-**********************************************************/
-
-
-
-/***********************************************************************************************
-  Actual Document Styling End
-***********************************************************************************************/

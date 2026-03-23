@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
 const adminLogSchema = new mongoose.Schema({
-    action: { type: String, required: true },      // e.g. 'GRANT_ACCESS', 'DELETE_USER', 'SET_SALE', 'ADD_PRODUCT', 'UPDATE_PRODUCT', 'DELETE_PRODUCT', 'UPDATE_ORDER_STATUS'
+    action: { type: String, required: true },
     adminId: { type: String, required: true },
     adminEmail: { type: String, required: true },
-    targetType: { type: String },                   // 'user', 'product', 'order'
+    targetType: { type: String },
     targetId: { type: String },
-    details: { type: mongoose.Schema.Types.Mixed },  // additional details about the action
+    details: { type: mongoose.Schema.Types.Mixed },
     ip: { type: String },
     createdAt: { type: Date, default: Date.now }
 });

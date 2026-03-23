@@ -1,4 +1,4 @@
-// server/middleware/auditLogger.js - Audit logging for admin actions
+
 
 const Logger = require('../Logger');
 const auditLogger = new Logger('audit.log');
@@ -36,7 +36,7 @@ function logProductDelete(adminId, adminEmail, productId, productTitle) {
   });
 }
 
-module.exports = { 
+module.exports = {
   logAdminAction,
   logProductAdd,
   logProductUpdate,

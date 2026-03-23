@@ -172,7 +172,7 @@ module.exports = ({
             }
 
             setLastGoogleLogin({ email: user.email, name: user.name, userId: String(user._id), at: new Date().toISOString() });
-            console.log('✅ Google login success:', getLastGoogleLogin().email);
+            console.log(' Google login success:', getLastGoogleLogin().email);
             logLoginAttempt(user.email, true, req.ip, 'google');
 
             const token = createAccessToken(user);

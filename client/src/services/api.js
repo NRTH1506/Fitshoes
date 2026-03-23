@@ -26,7 +26,7 @@ async function request(endpoint, options = {}) {
   return { ok: res.ok, status: res.status, data };
 }
 
-// ─── Auth ─────────────────────────────────────────────
+// Auth
 export const login = (email, password) =>
   request('/api/login', { method: 'POST', body: JSON.stringify({ email, password }) });
 
@@ -42,7 +42,7 @@ export const verifyOtp = (email, code) =>
 export const resendOtp = (email) =>
   request('/api/resend-otp', { method: 'POST', body: JSON.stringify({ email }) });
 
-// ─── User ─────────────────────────────────────────────
+// User
 export const getMe = () =>
   request('/api/me');
 
@@ -66,7 +66,7 @@ export const uploadAvatar = (formData) => {
   });
 };
 
-// ─── Products ─────────────────────────────────────────
+//  Products
 export const getProducts = () =>
   request('/api/products');
 
@@ -79,7 +79,7 @@ export const addProduct = (payload) =>
 export const deleteProduct = (id) =>
   request(`/api/products/${id}`, { method: 'DELETE' });
 
-// ─── Payment ──────────────────────────────────────────
+// Payment 
 export const createZaloPayOrder = (amount, items, userId) =>
   request('/api/pay/zalopay', { method: 'POST', body: JSON.stringify({ amount, items, userId }) });
 
@@ -89,11 +89,11 @@ export const queryZaloPayOrder = (appTransId) =>
 export const fetchUserOrders = (userId) =>
   request(`/api/orders/user/${userId}`);
 
-// ─── Chatbot ──────────────────────────────────────────
+// Chatbot 
 export const sendChatMessage = (message, userId, isAdmin) =>
   request('/api/chat', { method: 'POST', body: JSON.stringify({ message, userId, isAdmin }) });
 
-// ─── Logs ─────────────────────────────────────────────
+// Logs
 export const getLogs = (params = {}) => {
   if (typeof params === 'string') {
     return request(`/api/logs?type=${encodeURIComponent(params)}`);
@@ -109,7 +109,7 @@ export const getLogs = (params = {}) => {
   return request(`/api/logs${qs ? `?${qs}` : ''}`);
 };
 
-// ─── Admin ────────────────────────────────────────────
+// Admin
 export const fetchAdminUsers = () =>
   request('/api/admin/users');
 
@@ -178,7 +178,7 @@ export const fetchAdminActivityLogs = (params = {}) => {
   return request(`/api/admin/activity-logs${qs ? `?${qs}` : ''}`);
 };
 
-// ─── Aliases (used by page components) ────────────────
+
 export { getProducts as fetchProducts };
 export { login as loginUser };
 export { register as registerUser };

@@ -45,7 +45,7 @@ export default function AdminPage() {
   );
 }
 
-/* ═══════════════════ SHOP MANAGEMENT TAB ═══════════════════ */
+
 function ShopTab() {
   const [products, setProducts] = useState([]);
   const [editProduct, setEditProduct] = useState(null);
@@ -55,12 +55,12 @@ function ShopTab() {
 
   useEffect(() => { loadProducts(); }, []);
   async function loadProducts() {
-    try { const res = await fetchProducts(); setProducts(res.data?.data || []); } catch {}
+    try { const res = await fetchProducts(); setProducts(res.data?.data || []); } catch { }
   }
 
   async function handleDelete(id) {
     if (!confirm('Delete this product?')) return;
-    try { await deleteProduct(id); loadProducts(); } catch {}
+    try { await deleteProduct(id); loadProducts(); } catch { }
   }
 
   return (
@@ -106,7 +106,7 @@ function ShopTab() {
   );
 }
 
-/* ─── Product Add/Edit Modal ─── */
+/* Product Add/Edit Modal */
 function ProductModal({ product, onClose, onSaved }) {
   const isEdit = !!product;
   const [form, setForm] = useState({
@@ -127,7 +127,7 @@ function ProductModal({ product, onClose, onSaved }) {
     try {
       const res = await uploadProductImage(file);
       if (res.data?.imageUrl) set('images', [...form.images, res.data.imageUrl]);
-    } catch {} finally { setUploading(false); }
+    } catch { } finally { setUploading(false); }
   }
 
   function removeImage(idx) {
@@ -210,7 +210,7 @@ function ProductModal({ product, onClose, onSaved }) {
   );
 }
 
-/* ─── Sale Modal ─── */
+/*  Sale Modal  */
 function SaleModal({ onClose, products, onDone }) {
   const [mode, setMode] = useState('category');
   const [category, setCategory] = useState('');
@@ -229,7 +229,7 @@ function SaleModal({ onClose, products, onDone }) {
     else data.productIds = selectedIds;
     try {
       const res = await setSale(data);
-      onDone(`✅ ${res.data?.message || 'Sale updated'}`);
+      onDone(` ${res.data?.message || 'Sale updated'}`);
     } catch (err) { alert(err.response?.data?.message || 'Error'); }
   }
 
@@ -283,7 +283,7 @@ function SaleModal({ onClose, products, onDone }) {
   );
 }
 
-/* ═══════════════════ ORDERS TAB ═══════════════════ */
+/* ORDERS TAB  */
 function OrdersTab() {
   const [orders, setOrders] = useState([]);
   const [revenue, setRevenue] = useState(null);
@@ -297,12 +297,12 @@ function OrdersTab() {
 
   async function loadOrders() {
     setLoading(true);
-    try { const res = await fetchAdminOrders({ ...filters, page, limit }); setOrders(res.data?.orders || []); setTotal(res.data?.total || 0); } catch {} finally { setLoading(false); }
+    try { const res = await fetchAdminOrders({ ...filters, page, limit }); setOrders(res.data?.orders || []); setTotal(res.data?.total || 0); } catch { } finally { setLoading(false); }
   }
   async function loadRevenue() {
-    try { const res = await fetchRevenue({ startDate: filters.startDate, endDate: filters.endDate }); setRevenue(res.data?.revenue || null); } catch {}
+    try { const res = await fetchRevenue({ startDate: filters.startDate, endDate: filters.endDate }); setRevenue(res.data?.revenue || null); } catch { }
   }
-  async function handleStatusChange(id, status) { try { await updateOrderStatus(id, status); loadOrders(); loadRevenue(); } catch {} }
+  async function handleStatusChange(id, status) { try { await updateOrderStatus(id, status); loadOrders(); loadRevenue(); } catch { } }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const cardStyle = { background: 'linear-gradient(135deg,#667eea22,#764ba222)', padding: '1.2rem', borderRadius: '.8rem', textAlign: 'center', flex: 1, minWidth: '140px' };
@@ -365,7 +365,7 @@ function OrdersTab() {
   );
 }
 
-/* ═══════════════════ USERS TAB ═══════════════════ */
+/*  USERS TAB  */
 function UsersTab({ user: currentUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -380,7 +380,7 @@ function UsersTab({ user: currentUser }) {
   useEffect(() => { loadUsers(); }, []);
   async function loadUsers() {
     setLoading(true);
-    try { const res = await fetchAdminUsers(); setUsers(res.data?.users || []); } catch {} finally { setLoading(false); }
+    try { const res = await fetchAdminUsers(); setUsers(res.data?.users || []); } catch { } finally { setLoading(false); }
   }
 
   const sorted = [...users].sort((a, b) => {
@@ -389,18 +389,18 @@ function UsersTab({ user: currentUser }) {
     return va.localeCompare(vb);
   });
 
-  async function handleGrant(id) { try { await grantAdminAccess(id); setMsg('✅ Access granted'); loadUsers(); } catch (err) { setMsg('❌ ' + (err.response?.data?.message || 'Error')); } }
-  async function handleRevoke(id) { if (!confirm('Revoke?')) return; try { await revokeAdminAccess(id); setMsg('✅ Revoked'); loadUsers(); } catch (err) { setMsg('❌ ' + (err.response?.data?.message || 'Error')); } }
-  async function handleDeleteUser(id) { if (!confirm('Delete this user permanently?')) return; try { await deleteUser(id); setMsg('✅ User deleted'); setSelectedUser(null); loadUsers(); } catch (err) { setMsg('❌ ' + (err.response?.data?.message || 'Error')); } }
+  async function handleGrant(id) { try { await grantAdminAccess(id); setMsg(' Access granted'); loadUsers(); } catch (err) { setMsg(' ' + (err.response?.data?.message || 'Error')); } }
+  async function handleRevoke(id) { if (!confirm('Revoke?')) return; try { await revokeAdminAccess(id); setMsg(' Revoked'); loadUsers(); } catch (err) { setMsg(' ' + (err.response?.data?.message || 'Error')); } }
+  async function handleDeleteUser(id) { if (!confirm('Delete this user permanently?')) return; try { await deleteUser(id); setMsg(' User deleted'); setSelectedUser(null); loadUsers(); } catch (err) { setMsg('❌ ' + (err.response?.data?.message || 'Error')); } }
 
   async function handleTransfer() {
     if (!transferEmail.trim() || !confirm(`Transfer ownership to ${transferEmail}? You will lose admin role.`)) return;
-    try { await transferOwnership(transferEmail); setMsg('✅ Ownership transferred. Logging out...'); setTimeout(() => { localStorage.clear(); window.location.href = '/login'; }, 2000); }
-    catch (err) { setMsg('❌ ' + (err.response?.data?.message || 'Error')); }
+    try { await transferOwnership(transferEmail); setMsg(' Ownership transferred. Logging out...'); setTimeout(() => { localStorage.clear(); window.location.href = '/login'; }, 2000); }
+    catch (err) { setMsg(' ' + (err.response?.data?.message || 'Error')); }
   }
 
   async function viewUser(id) {
-    try { const res = await getUserById(id); setSelectedUser(res.data?.user || null); } catch {}
+    try { const res = await getUserById(id); setSelectedUser(res.data?.user || null); } catch { }
   }
 
   const roleColor = { admin: '#dc2626', user: '#666' };
@@ -441,8 +441,8 @@ function UsersTab({ user: currentUser }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.5rem', fontSize: '1.2rem' }}>
             {[['Name', selectedUser.name], ['Email', selectedUser.email], ['Phone', selectedUser.phone || '—'], ['Gender', selectedUser.gender || '—'],
-              ['Address', selectedUser.address || '—'], ['Role', selectedUser.role], ['Admin Access', selectedUser.canAccessAdmin ? 'Yes' : 'No'],
-              ['Bio', selectedUser.bio || '—'], ['Joined', new Date(selectedUser.createdAt).toLocaleDateString('vi-VN')]
+            ['Address', selectedUser.address || '—'], ['Role', selectedUser.role], ['Admin Access', selectedUser.canAccessAdmin ? 'Yes' : 'No'],
+            ['Bio', selectedUser.bio || '—'], ['Joined', new Date(selectedUser.createdAt).toLocaleDateString('vi-VN')]
             ].map(([k, v]) => <div key={k}><strong>{k}:</strong> {v}</div>)}
           </div>
           {selectedUser.role !== 'admin' && isOwner && (
@@ -491,19 +491,19 @@ function UsersTab({ user: currentUser }) {
   );
 }
 
-/* ═══════════════════ ACTIVITY LOGS TAB ═══════════════════ */
+/*  ACTIVITY LOGS TAB  */
 
 const ACTION_META = {
-  GRANT_ACCESS:       { icon: '🔓', color: '#16a34a', bg: '#f0fdf4', label: 'Granted Access' },
-  REVOKE_ACCESS:      { icon: '🔒', color: '#f59e0b', bg: '#fffbeb', label: 'Revoked Access' },
-  TRANSFER_OWNERSHIP: { icon: '👑', color: '#dc2626', bg: '#fef2f2', label: 'Transferred Ownership' },
-  DELETE_USER:        { icon: '🗑️', color: '#dc2626', bg: '#fef2f2', label: 'Deleted User' },
-  UPDATE_ORDER_STATUS:{ icon: '📦', color: '#667eea', bg: '#eef2ff', label: 'Updated Order' },
-  SET_SALE:           { icon: '🏷️', color: '#f59e0b', bg: '#fffbeb', label: 'Set Sale' },
-  CLEAR_SALE:         { icon: '❌', color: '#6b7280', bg: '#f3f4f6', label: 'Cleared Sale' },
-  ADD_PRODUCT:        { icon: '➕', color: '#16a34a', bg: '#f0fdf4', label: 'Added Product' },
-  UPDATE_PRODUCT:     { icon: '✏️', color: '#667eea', bg: '#eef2ff', label: 'Edited Product' },
-  DELETE_PRODUCT:     { icon: '🗑️', color: '#dc2626', bg: '#fef2f2', label: 'Deleted Product' },
+  GRANT_ACCESS: { icon: '🔓', color: '#16a34a', bg: '#f0fdf4', label: 'Granted Access' },
+  REVOKE_ACCESS: { icon: '🔒', color: '#f59e0b', bg: '#fffbeb', label: 'Revoked Access' },
+  TRANSFER_OWNERSHIP: { color: '#dc2626', bg: '#fef2f2', label: 'Transferred Ownership' },
+  DELETE_USER: { icon: '🗑️', color: '#dc2626', bg: '#fef2f2', label: 'Deleted User' },
+  UPDATE_ORDER_STATUS: { color: '#667eea', bg: '#eef2ff', label: 'Updated Order' },
+  SET_SALE: { icon: '🏷️', color: '#f59e0b', bg: '#fffbeb', label: 'Set Sale' },
+  CLEAR_SALE: { color: '#6b7280', bg: '#f3f4f6', label: 'Cleared Sale' },
+  ADD_PRODUCT: { icon: '➕', color: '#16a34a', bg: '#f0fdf4', label: 'Added Product' },
+  UPDATE_PRODUCT: { icon: '✏️', color: '#667eea', bg: '#eef2ff', label: 'Edited Product' },
+  DELETE_PRODUCT: { icon: '🗑️', color: '#dc2626', bg: '#fef2f2', label: 'Deleted Product' },
 };
 
 function describeLog(log) {
@@ -546,7 +546,7 @@ function ActivityLogsTab() {
   useEffect(() => { loadLogs(); }, [page, search]);
   async function loadLogs() {
     setLoading(true);
-    try { const res = await fetchAdminActivityLogs({ page, limit, search }); setLogs(res.data?.logs || []); setTotal(res.data?.total || 0); } catch {} finally { setLoading(false); }
+    try { const res = await fetchAdminActivityLogs({ page, limit, search }); setLogs(res.data?.logs || []); setTotal(res.data?.total || 0); } catch { } finally { setLoading(false); }
   }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
