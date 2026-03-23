@@ -5,11 +5,11 @@ import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const SHOP_CATEGORIES = [
-  { key: 'running', label: 'Running', icon: '🏃' },
-  { key: 'gym', label: 'Training & Gym', icon: '💪' },
-  { key: 'casual', label: 'Casual', icon: '👟' },
-  { key: 'sandals', label: 'Sandals', icon: '🩴' },
-  { key: 'boots', label: 'Boots', icon: '🥾' },
+  { key: 'running', label: 'Running' },
+  { key: 'gym', label: 'Training & Gym' },
+  { key: 'casual', label: 'Casual' },
+  { key: 'sandals', label: 'Sandals' },
+  { key: 'boots', label: 'Boots' },
 ];
 
 const GENDER_LINKS = [
