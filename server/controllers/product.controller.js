@@ -13,7 +13,7 @@ module.exports = ({
         try {
             if (!dbConnectedRef()) return res.status(503).json({ success: false, message: 'Database unavailable' });
             const { payload, error } = buildProductPayload(req.body);
-            const { title, title_vi, price, oldPrice, currency, brand, description_vi, images, gender } = req.body || {};
+            const { title, title_vi, price, currency, brand, description_vi, images, gender, category, inventory } = req.body || {};
 
             if (error) {
                 return res.status(400).json({ success: false, message: error });
@@ -27,12 +27,13 @@ module.exports = ({
                 title: title ? String(title).trim() : String(title_vi).trim(),
                 title_vi: String(title_vi).trim(),
                 price: Number(price),
-                oldPrice: oldPrice ? Number(oldPrice) : undefined,
                 currency: String(currency || 'VND'),
                 brand: String(brand || '').trim(),
                 description_vi: String(description_vi || ''),
                 images: Array.isArray(images) ? images.map(String) : (images ? [String(images)] : []),
-                gender: ['male', 'female', 'unisex'].includes(gender) ? gender : 'unisex'
+                gender: ['male', 'female', 'unisex'].includes(gender) ? gender : 'unisex',
+                category: ['running','gym','casual','sandals','boots','other'].includes(category) ? category : 'other',
+                inventory: Array.isArray(inventory) ? inventory : []
             });
 
             await product.save();
@@ -92,7 +93,7 @@ module.exports = ({
             }
 
             const { payload, error } = buildProductPayload(req.body);
-            const { title, title_vi, price, oldPrice, currency, description_vi, images, gender } = req.body || {};
+            const { title, title_vi, price, currency, description_vi, images, gender, category, inventory, brand } = req.body || {};
 
             if (error) {
                 return res.status(400).json({ success: false, message: error });
@@ -103,18 +104,23 @@ module.exports = ({
             }
 
             try {
+                const updateData = payload || {
+                    title: String(title).trim(),
+                    title_vi: String(title_vi).trim(),
+                    price: Number(price),
+                    currency: String(currency || 'VND'),
+                    brand: brand !== undefined ? String(brand).trim() : undefined,
+                    description_vi: String(description_vi || ''),
+                    images: Array.isArray(images) ? images.map(String) : (images ? [String(images)] : []),
+                    gender: ['male', 'female', 'unisex'].includes(gender) ? gender : 'unisex',
+                    category: ['running','gym','casual','sandals','boots','other'].includes(category) ? category : undefined,
+                    inventory: Array.isArray(inventory) ? inventory : undefined
+                };
+                // Remove undefined fields
+                Object.keys(updateData).forEach(k => updateData[k] === undefined && delete updateData[k]);
                 const product = await Product.findByIdAndUpdate(
                     req.params.id,
-                    payload || {
-                        title: String(title).trim(),
-                        title_vi: String(title_vi).trim(),
-                        price: Number(price),
-                        oldPrice: oldPrice ? Number(oldPrice) : undefined,
-                        currency: String(currency || 'VND'),
-                        description_vi: String(description_vi || ''),
-                        images: Array.isArray(images) ? images.map(String) : (images ? [String(images)] : []),
-                        gender: ['male', 'female', 'unisex'].includes(gender) ? gender : 'unisex'
-                    },
+                    updateData,
                     { new: true, runValidators: true }
                 );
 

@@ -42,20 +42,39 @@ export default function ProductDetailPage() {
 
   const images = Array.isArray(product.images) && product.images.length ? product.images : [product.img || ''];
   const related = allProducts.filter((p) => (p.id !== product.id && p._id !== product._id) && p.gender === product.gender).slice(0, 6);
-  const sizes = [36, 37, 38, 39, 40, 41, 42, 43];
+
+  // Build sizes from inventory or fallback
+  const inventory = Array.isArray(product.inventory) && product.inventory.length
+    ? product.inventory
+    : [36, 37, 38, 39, 40, 41, 42, 43].map(s => ({ size: s, quantity: 99 }));
+
+  const hasSale = product.salePrice && product.salePrice > 0;
+  const displayPrice = hasSale ? product.salePrice : product.price;
+
+  // Get stock for selected size
+  const selectedStock = inventory.find(inv => String(inv.size) === selectedSize);
+  const maxQty = selectedStock ? selectedStock.quantity : 99;
 
   function handleAdd() {
     if (!selectedSize) { alert(t('product.pleaseSelectSize')); return; }
-    addToCart(product, qty, selectedSize);
+    if (maxQty <= 0) { alert('This size is out of stock'); return; }
+    addToCart({ ...product, price: displayPrice }, qty, selectedSize);
     showToast(`✅ ${t('product.addedToCart', { name: product.title_vi, qty })}`);
   }
+
+  // Button styles for +/-
+  const qtyBtnStyle = {
+    padding: '.6rem 1rem', border: 'none', fontSize: '1.4rem', cursor: 'pointer', fontWeight: 700,
+    background: 'linear-gradient(135deg,#667eea,#764ba2)', color: '#fff', transition: 'all .2s'
+  };
 
   return (
     <section style={{ padding: '3rem 5%' }}>
       <div className="product-detail-grid">
         {/* Gallery */}
         <div className="product-gallery">
-          <div className="gallery-main" style={{ borderRadius: '1rem', overflow: 'hidden', marginBottom: '1rem' }}>
+          <div className="gallery-main" style={{ borderRadius: '1rem', overflow: 'hidden', marginBottom: '1rem', position: 'relative' }}>
+            {hasSale && <span style={{ position: 'absolute', top: '1rem', left: '1rem', background: '#dc2626', color: '#fff', padding: '.3rem .8rem', borderRadius: '.4rem', fontSize: '1.2rem', fontWeight: 700, zIndex: 2 }}>SALE</span>}
             <img id="main-product-img" src={mainImg} alt={product.title_vi} style={{ width: '100%', height: 'auto' }} />
           </div>
           <div className="gallery-thumbs-row">
@@ -72,42 +91,63 @@ export default function ProductDetailPage() {
 
         {/* Info */}
         <div className="product-info-section">
-          <h1 style={{ fontSize: '2.6rem', color: 'var(--helping-color)', marginBottom: '1rem' }}>{product.title_vi}</h1>
+          <h1 style={{ fontSize: '2.6rem', color: 'var(--helping-color)', marginBottom: '.5rem' }}>{product.title_vi}</h1>
+          {product.category && <div style={{ fontSize: '1.2rem', color: '#888', marginBottom: '.8rem', textTransform: 'capitalize' }}>{product.category} · {product.gender || 'Unisex'}</div>}
           <div style={{ marginBottom: '1rem' }}>
-            <span style={{ fontSize: '2.2rem', fontWeight: 700, color: 'var(--primary-color)' }}>{formatPrice(product.price, product.currency)}</span>
-            {product.oldPrice && <span style={{ fontSize: '1.5rem', color: '#999', textDecoration: 'line-through', marginLeft: '1rem' }}>{formatPrice(product.oldPrice, product.currency)}</span>}
+            <span style={{ fontSize: '2.2rem', fontWeight: 700, color: hasSale ? '#dc2626' : 'var(--primary-color)' }}>
+              {formatPrice(displayPrice, product.currency)}
+            </span>
+            {hasSale && <span style={{ fontSize: '1.5rem', color: '#999', textDecoration: 'line-through', marginLeft: '1rem' }}>{formatPrice(product.price, product.currency)}</span>}
+            {hasSale && <span style={{ marginLeft: '.8rem', background: '#fef2f2', color: '#dc2626', padding: '.2rem .6rem', borderRadius: '.3rem', fontSize: '1.1rem', fontWeight: 700 }}>-{Math.round((1 - product.salePrice / product.price) * 100)}%</span>}
           </div>
           <div style={{ marginBottom: '1rem', color: '#e5a100' }}>
             <i className="fa fa-star"></i> <span>4.8 (128 {t('product.reviews')})</span>
           </div>
           <p style={{ fontSize: '1.4rem', color: '#555', lineHeight: 1.6, marginBottom: '2rem' }}>{product.description_vi}</p>
 
-          {/* Sizes */}
+          {/* Sizes — stock-based */}
           <div style={{ marginBottom: '1.5rem' }}>
             <div style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: '.8rem' }}><i className="fa fa-ruler"></i> {t('product.selectSize')}</div>
             <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap' }}>
-              {sizes.map((s) => (
-                <button key={s} onClick={() => setSelectedSize(String(s))}
-                  style={{
-                    padding: '.7rem 1.4rem', borderRadius: '.5rem', border: '2px solid', fontSize: '1.3rem', cursor: 'pointer', fontWeight: 600,
-                    background: selectedSize === String(s) ? 'var(--main-color)' : '#fff',
-                    color: selectedSize === String(s) ? '#fff' : 'var(--main-color)',
-                    borderColor: 'var(--main-color)',
-                  }}>
-                  {s}
-                </button>
-              ))}
+              {inventory.map((inv) => {
+                const inStock = inv.quantity > 0;
+                const isSelected = selectedSize === String(inv.size);
+                return (
+                  <button key={inv.size} onClick={() => inStock && setSelectedSize(String(inv.size))}
+                    disabled={!inStock}
+                    style={{
+                      padding: '.7rem 1.4rem', borderRadius: '.5rem', border: '2px solid', fontSize: '1.3rem',
+                      fontWeight: 600, position: 'relative', transition: 'all .2s',
+                      cursor: inStock ? 'pointer' : 'not-allowed',
+                      background: isSelected ? 'var(--main-color)' : inStock ? '#fff' : '#f0f0f0',
+                      color: isSelected ? '#fff' : inStock ? 'var(--main-color)' : '#bbb',
+                      borderColor: isSelected ? 'var(--main-color)' : inStock ? '#ddd' : '#e0e0e0',
+                      opacity: inStock ? 1 : 0.5,
+                      textDecoration: inStock ? 'none' : 'line-through',
+                    }}>
+                    {inv.size}
+                    {inStock && inv.quantity <= 3 && (
+                      <span style={{ position: 'absolute', top: '-8px', right: '-5px', background: '#f59e0b', color: '#fff', fontSize: '.85rem', padding: '.1rem .3rem', borderRadius: '.2rem', fontWeight: 700 }}>
+                        {inv.quantity}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
+            {selectedSize && selectedStock && selectedStock.quantity <= 5 && (
+              <div style={{ marginTop: '.5rem', fontSize: '1.1rem', color: '#f59e0b', fontWeight: 600 }}>⚡ Only {selectedStock.quantity} left in stock!</div>
+            )}
           </div>
 
           {/* Quantity + Add */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '.4rem' }}>{t('product.quantity')}</div>
-              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: '.5rem', overflow: 'hidden' }}>
-                <button onClick={() => setQty((q) => Math.max(1, q - 1))} style={{ padding: '.6rem 1rem', background: '#f5f5f5', border: 'none', fontSize: '1.4rem', cursor: 'pointer' }}>−</button>
-                <span style={{ padding: '.6rem 1.5rem', fontSize: '1.4rem', fontWeight: 600 }}>{qty}</span>
-                <button onClick={() => setQty((q) => q + 1)} style={{ padding: '.6rem 1rem', background: '#f5f5f5', border: 'none', fontSize: '1.4rem', cursor: 'pointer' }}>+</button>
+              <div style={{ display: 'flex', alignItems: 'center', border: 'none', borderRadius: '.5rem', overflow: 'hidden' }}>
+                <button onClick={() => setQty((q) => Math.max(1, q - 1))} style={{ ...qtyBtnStyle, borderRadius: '.5rem 0 0 .5rem' }}>−</button>
+                <span style={{ padding: '.6rem 1.5rem', fontSize: '1.4rem', fontWeight: 600, background: '#f8f8f8' }}>{qty}</span>
+                <button onClick={() => setQty((q) => Math.min(maxQty, q + 1))} style={{ ...qtyBtnStyle, borderRadius: '0 .5rem .5rem 0' }}>+</button>
               </div>
             </div>
             <button onClick={handleAdd} style={{ flex: 1, background: 'linear-gradient(135deg,#667eea,#764ba2)', color: '#fff', padding: '1.1rem', borderRadius: '.8rem', fontSize: '1.4rem', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
@@ -124,13 +164,18 @@ export default function ProductDetailPage() {
         <div style={{ marginTop: '4rem' }}>
           <h3 style={{ fontSize: '2.2rem', color: 'var(--helping-color)', marginBottom: '2rem' }}>{t('product.related')}</h3>
           <div className="d-grid grid-4-columns" style={{ gap: '0' }}>
-            {related.map((p) => (
-              <Link to={`/product/${p.id || p._id}`} key={p.id || p._id} className="shoes-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <img src={resolveImagePath((Array.isArray(p.images) && p.images.length) ? p.images[0] : '')} alt={p.title_vi} />
-                <h3>{p.title_vi}</h3>
-                <h4 className="product-price">{formatPrice(p.price, p.currency)}</h4>
-              </Link>
-            ))}
+            {related.map((p) => {
+              const rHasSale = p.salePrice && p.salePrice > 0;
+              return (
+                <Link to={`/product/${p.id || p._id}`} key={p.id || p._id} className="shoes-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <img src={resolveImagePath((Array.isArray(p.images) && p.images.length) ? p.images[0] : '')} alt={p.title_vi} />
+                  <h3>{p.title_vi}</h3>
+                  <h4>
+                    {rHasSale ? <>{formatPrice(p.salePrice, p.currency)} <span>{formatPrice(p.price, p.currency)}</span></> : formatPrice(p.price, p.currency)}
+                  </h4>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

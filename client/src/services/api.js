@@ -145,6 +145,39 @@ export const fetchRevenue = (params = {}) => {
 export const updateOrderStatus = (orderId, status) =>
   request(`/api/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
 
+export const deleteUser = (userId) =>
+  request(`/api/admin/users/${userId}`, { method: 'DELETE' });
+
+export const getUserById = (userId) =>
+  request(`/api/admin/users/${userId}`);
+
+export const setSale = (data) =>
+  request('/api/admin/products/sale', { method: 'PUT', body: JSON.stringify(data) });
+
+export const uploadProductImage = async (file) => {
+  const token = localStorage.getItem('token');
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await fetch(`${BASE}/api/admin/products/upload-image`, {
+    method: 'POST',
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: formData
+  });
+  return { data: await res.json() };
+};
+
+export const updateProduct = (id, data) =>
+  request(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+export const fetchAdminActivityLogs = (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.page) query.set('page', String(params.page));
+  if (params.limit) query.set('limit', String(params.limit));
+  if (params.search) query.set('search', params.search);
+  const qs = query.toString();
+  return request(`/api/admin/activity-logs${qs ? `?${qs}` : ''}`);
+};
+
 // ─── Aliases (used by page components) ────────────────
 export { getProducts as fetchProducts };
 export { login as loginUser };

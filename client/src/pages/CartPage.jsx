@@ -18,8 +18,7 @@ export default function CartPage() {
 
   async function handleCheckout() {
     if (!user) {
-      alert(t('profile.notLoggedIn'));
-      navigate('/login');
+      navigate('/login?redirect=/cart');
       return;
     }
     try {

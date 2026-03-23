@@ -10,6 +10,7 @@ export default function VerifyOtpPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email || '';
+  const redirectTo = location.state?.redirect || '/';
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(300);
@@ -28,7 +29,7 @@ export default function VerifyOtpPage() {
     setError('');
     try {
       const res = await verifyOtp(email, otp);
-      if (res.data?.user && res.data?.token) { login(res.data.user, res.data.token); navigate('/'); }
+      if (res.data?.user && res.data?.token) { login(res.data.user, res.data.token); navigate(redirectTo); }
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');
     }

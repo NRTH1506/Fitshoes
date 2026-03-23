@@ -283,9 +283,11 @@ const adminRoutes = createAdminRoutes({
     baseDir: __dirname,
     User,
     Order,
+    Product,
     authenticateJWT,
     requireAdminAccess,
-    requireAdminRole
+    requireAdminRole,
+    upload
 });
 
 app.use('/api', authRoutes);

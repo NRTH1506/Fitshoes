@@ -1,10 +1,25 @@
+const AdminLog = require('../models/AdminLog');
+
 module.exports = ({
     fs,
     path,
     baseDir,
     User,
-    Order
-}) => ({
+    Order,
+    Product
+}) => {
+    // Helper to log admin activities
+    async function logAction(req, action, targetType, targetId, details) {
+        try {
+            await AdminLog.create({
+                action, adminId: req.user?.id || 'unknown', adminEmail: req.user?.email || 'unknown',
+                targetType, targetId: String(targetId || ''),
+                details, ip: req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || ''
+            });
+        } catch (e) { console.error('[AdminLog] save error:', e.message); }
+    }
+
+    return ({
     // ─── Logs ─────────────────────────────────────────────
     getLogs: (req, res) => {
         try {
@@ -99,6 +114,7 @@ module.exports = ({
             user.authorizedBy = req.user.id;
             user.authorizedAt = new Date();
             await user.save();
+            await logAction(req, 'GRANT_ACCESS', 'user', id, { email: user.email });
 
             res.json({ success: true, message: `Granted admin access to ${user.email}` });
         } catch (err) {
@@ -122,6 +138,7 @@ module.exports = ({
             user.authorizedBy = null;
             user.authorizedAt = null;
             await user.save();
+            await logAction(req, 'REVOKE_ACCESS', 'user', id, { email: user.email });
 
             res.json({ success: true, message: `Revoked admin access from ${user.email}` });
         } catch (err) {
@@ -160,6 +177,7 @@ module.exports = ({
             currentAdmin.authorizedBy = null;
             currentAdmin.authorizedAt = null;
             await currentAdmin.save();
+            await logAction(req, 'TRANSFER_OWNERSHIP', 'user', targetUser._id, { from: currentAdmin.email, to: targetUser.email });
 
             res.json({ success: true, message: `Ownership transferred to ${targetUser.email}` });
         } catch (err) {
@@ -290,11 +308,94 @@ module.exports = ({
 
             const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
             if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+            await logAction(req, 'UPDATE_ORDER_STATUS', 'order', id, { status, orderId: order.app_trans_id });
 
             res.json({ success: true, order });
         } catch (err) {
             console.error('[Admin] updateOrderStatus error:', err);
             res.status(500).json({ success: false, message: 'Failed to update order' });
         }
+    },
+
+    // ─── Delete User ──────────────────────────────────────
+    deleteUser: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const user = await User.findById(id);
+            if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+            if (user.role === 'admin') {
+                return res.status(403).json({ success: false, message: 'Cannot delete admin owner' });
+            }
+            await User.findByIdAndDelete(id);
+            await logAction(req, 'DELETE_USER', 'user', id, { email: user.email, name: user.name });
+            res.json({ success: true, message: `Deleted user ${user.email}` });
+        } catch (err) {
+            console.error('[Admin] deleteUser error:', err);
+            res.status(500).json({ success: false, message: 'Failed to delete user' });
+        }
+    },
+
+    getUserById: async (req, res) => {
+        try {
+            const user = await User.findById(req.params.id).select('-passwordHash').lean();
+            if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+            res.json({ success: true, user });
+        } catch (err) {
+            console.error('[Admin] getUserById error:', err);
+            res.status(500).json({ success: false, message: 'Failed to get user' });
+        }
+    },
+
+    // ─── Sale Management ──────────────────────────────────
+    setSale: async (req, res) => {
+        try {
+            const { productIds, category, salePrice, saleEndDate, clearSale } = req.body;
+
+            const filter = {};
+            if (productIds && productIds.length) {
+                filter._id = { $in: productIds };
+            } else if (category) {
+                filter.category = category;
+            } else {
+                return res.status(400).json({ success: false, message: 'Specify productIds or category' });
+            }
+
+            const update = clearSale
+                ? { salePrice: null, saleEndDate: null }
+                : { salePrice: Number(salePrice), saleEndDate: saleEndDate ? new Date(saleEndDate) : null };
+
+            const result = await Product.updateMany(filter, update);
+            await logAction(req, clearSale ? 'CLEAR_SALE' : 'SET_SALE', 'product', null, { filter, salePrice, saleEndDate, modifiedCount: result.modifiedCount });
+            res.json({ success: true, message: `Updated ${result.modifiedCount} products`, modifiedCount: result.modifiedCount });
+        } catch (err) {
+            console.error('[Admin] setSale error:', err);
+            res.status(500).json({ success: false, message: 'Failed to set sale' });
+        }
+    },
+
+    // ─── Admin Activity Logs ──────────────────────────────
+    getAdminLogs: async (req, res) => {
+        try {
+            const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+            const limit = Math.max(1, Math.min(100, parseInt(req.query.limit, 10) || 30));
+            const search = String(req.query.search || '').trim();
+
+            const filter = {};
+            if (search) {
+                filter.$or = [
+                    { action: { $regex: search, $options: 'i' } },
+                    { adminEmail: { $regex: search, $options: 'i' } },
+                    { targetId: { $regex: search, $options: 'i' } }
+                ];
+            }
+
+            const total = await AdminLog.countDocuments(filter);
+            const logs = await AdminLog.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean();
+            res.json({ success: true, logs, total, page, pages: Math.ceil(total / limit) });
+        } catch (err) {
+            console.error('[Admin] getAdminLogs error:', err);
+            res.status(500).json({ success: false, message: 'Failed to get admin logs' });
+        }
     }
 });
+};

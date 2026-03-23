@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { loginUser, loginGoogle } from '../services/api';
@@ -8,6 +8,8 @@ export default function LoginPage() {
   const { t } = useLanguage();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -21,10 +23,10 @@ export default function LoginPage() {
     try {
       const res = await loginUser(email, password);
       if (res.data?.needOtp) {
-        navigate('/verify-otp', { state: { email, from: 'login' } });
+        navigate('/verify-otp', { state: { email, from: 'login', redirect: redirectTo } });
       } else if (res.data?.user) {
         login(res.data.user, res.data?.token);
-        navigate('/');
+        navigate(redirectTo);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
@@ -41,7 +43,7 @@ export default function LoginPage() {
             const res = await loginGoogle(response.credential);
             if (res.data?.user && res.data?.token) {
               login(res.data.user, res.data.token);
-              navigate('/');
+              navigate(redirectTo);
             }
           } catch { setError('Google login failed'); }
         },
