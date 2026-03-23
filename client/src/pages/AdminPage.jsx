@@ -492,6 +492,49 @@ function UsersTab({ user: currentUser }) {
 }
 
 /* ═══════════════════ ACTIVITY LOGS TAB ═══════════════════ */
+
+const ACTION_META = {
+  GRANT_ACCESS:       { icon: '🔓', color: '#16a34a', bg: '#f0fdf4', label: 'Granted Access' },
+  REVOKE_ACCESS:      { icon: '🔒', color: '#f59e0b', bg: '#fffbeb', label: 'Revoked Access' },
+  TRANSFER_OWNERSHIP: { icon: '👑', color: '#dc2626', bg: '#fef2f2', label: 'Transferred Ownership' },
+  DELETE_USER:        { icon: '🗑️', color: '#dc2626', bg: '#fef2f2', label: 'Deleted User' },
+  UPDATE_ORDER_STATUS:{ icon: '📦', color: '#667eea', bg: '#eef2ff', label: 'Updated Order' },
+  SET_SALE:           { icon: '🏷️', color: '#f59e0b', bg: '#fffbeb', label: 'Set Sale' },
+  CLEAR_SALE:         { icon: '❌', color: '#6b7280', bg: '#f3f4f6', label: 'Cleared Sale' },
+  ADD_PRODUCT:        { icon: '➕', color: '#16a34a', bg: '#f0fdf4', label: 'Added Product' },
+  UPDATE_PRODUCT:     { icon: '✏️', color: '#667eea', bg: '#eef2ff', label: 'Edited Product' },
+  DELETE_PRODUCT:     { icon: '🗑️', color: '#dc2626', bg: '#fef2f2', label: 'Deleted Product' },
+};
+
+function describeLog(log) {
+  const d = log.details || {};
+  const admin = log.adminEmail || 'Unknown admin';
+  switch (log.action) {
+    case 'GRANT_ACCESS':
+      return <><b>{admin}</b> granted admin access to <b>{d.email || log.targetId}</b></>;
+    case 'REVOKE_ACCESS':
+      return <><b>{admin}</b> revoked admin access from <b>{d.email || log.targetId}</b></>;
+    case 'TRANSFER_OWNERSHIP':
+      return <><b>{d.from || admin}</b> transferred ownership to <b>{d.to || log.targetId}</b></>;
+    case 'DELETE_USER':
+      return <><b>{admin}</b> deleted user <b>{d.name || ''}</b> ({d.email || log.targetId})</>;
+    case 'UPDATE_ORDER_STATUS':
+      return <><b>{admin}</b> changed order <b>{d.orderId || log.targetId}</b> status to <b>{d.status}</b></>;
+    case 'SET_SALE':
+      return <><b>{admin}</b> set sale price <b>{d.salePrice ? formatPrice(d.salePrice) : ''}</b>{d.filter?.category ? <> for category <b>{d.filter.category}</b></> : ''} — {d.modifiedCount || 0} product(s) updated</>;
+    case 'CLEAR_SALE':
+      return <><b>{admin}</b> cleared sale{d.filter?.category ? <> for category <b>{d.filter.category}</b></> : ''} — {d.modifiedCount || 0} product(s) updated</>;
+    case 'ADD_PRODUCT':
+      return <><b>{admin}</b> added new product: <b>{d.title_vi || log.targetId}</b>{d.price ? ` (${formatPrice(d.price)})` : ''}</>;
+    case 'UPDATE_PRODUCT':
+      return <><b>{admin}</b> edited product: <b>{d.title_vi || log.targetId}</b></>;
+    case 'DELETE_PRODUCT':
+      return <><b>{admin}</b> deleted product: <b>{d.title_vi || log.targetId}</b></>;
+    default:
+      return <><b>{admin}</b> performed {log.action} on {log.targetType || 'unknown'}</>;
+  }
+}
+
 function ActivityLogsTab() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -507,45 +550,52 @@ function ActivityLogsTab() {
   }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
-  const actionColors = {
-    GRANT_ACCESS: '#16a34a', REVOKE_ACCESS: '#f59e0b', TRANSFER_OWNERSHIP: '#dc2626',
-    DELETE_USER: '#dc2626', UPDATE_ORDER_STATUS: '#667eea', SET_SALE: '#f59e0b', CLEAR_SALE: '#999',
-    ADD_PRODUCT: '#16a34a', UPDATE_PRODUCT: '#667eea', DELETE_PRODUCT: '#dc2626'
-  };
 
   return (
     <div>
       <div style={{ display: 'flex', gap: '.8rem', marginBottom: '1.5rem', alignItems: 'center' }}>
-        <input placeholder="Search by action, email, or target..." value={search}
+        <input placeholder="🔍 Search logs..." value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
           style={{ ...filterInp, flex: 1 }} />
-        <span style={{ fontSize: '1.2rem', color: '#666' }}>{total} entries</span>
+        <span style={{ fontSize: '1.2rem', color: '#666', whiteSpace: 'nowrap' }}>{total} entries</span>
       </div>
 
-      {loading ? <p style={{ textAlign: 'center', color: '#666' }}>Loading...</p> : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
-          {logs.map((log, i) => (
-            <div key={log._id || i} style={{ display: 'grid', gridTemplateColumns: '160px 200px 1fr 120px', gap: '1rem', alignItems: 'center', padding: '.8rem 1rem', background: i % 2 === 0 ? '#f8f9fa' : '#fff', borderRadius: '.4rem', fontSize: '1.2rem' }}>
-              <span style={{ color: actionColors[log.action] || '#333', fontWeight: 700, fontSize: '1.1rem' }}>{log.action}</span>
-              <span style={{ color: '#555' }}>{log.adminEmail}</span>
-              <span style={{ color: '#777', fontSize: '1.1rem' }}>
-                {log.targetType && <><strong>{log.targetType}</strong>: {log.targetId} </>}
-                {log.details && <span style={{ color: '#999' }}>— {typeof log.details === 'string' ? log.details : JSON.stringify(log.details)}</span>}
-              </span>
-              <span style={{ color: '#999', fontSize: '1rem', textAlign: 'right' }}>
-                {log.ip && <span title="IP" style={{ marginRight: '.3rem' }}>🌐</span>}
-                {new Date(log.createdAt).toLocaleString('vi-VN')}
-              </span>
-            </div>
-          ))}
-          {logs.length === 0 && <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>No activity logs yet</div>}
+      {loading ? <p style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>Loading...</p> : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '.8rem' }}>
+          {logs.map((log, i) => {
+            const meta = ACTION_META[log.action] || { icon: '📝', color: '#333', bg: '#f8f9fa', label: log.action };
+            const time = new Date(log.createdAt);
+            return (
+              <div key={log._id || i} style={{
+                display: 'flex', gap: '1rem', alignItems: 'flex-start', padding: '1rem 1.2rem',
+                background: meta.bg, borderRadius: '.6rem', borderLeft: `4px solid ${meta.color}`,
+                transition: 'transform .1s',
+              }}>
+                {/* Icon */}
+                <div style={{ fontSize: '1.8rem', lineHeight: 1, paddingTop: '.2rem' }}>{meta.icon}</div>
+
+                {/* Content */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.3rem' }}>
+                    <span style={{ fontSize: '1.15rem', fontWeight: 700, color: meta.color, textTransform: 'uppercase', letterSpacing: '.03em' }}>{meta.label}</span>
+                    <span style={{ fontSize: '1.05rem', color: '#999', whiteSpace: 'nowrap' }}>
+                      {log.ip && <span title={`IP: ${log.ip}`} style={{ cursor: 'help', marginRight: '.4rem' }}>🌐</span>}
+                      {time.toLocaleDateString('vi-VN')} · {time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '1.25rem', color: '#333', lineHeight: 1.5 }}>{describeLog(log)}</div>
+                </div>
+              </div>
+            );
+          })}
+          {logs.length === 0 && <div style={{ textAlign: 'center', padding: '3rem', color: '#999', fontSize: '1.3rem' }}>No activity logs yet</div>}
         </div>
       )}
 
       {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1.2rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1.5rem', alignItems: 'center' }}>
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={pageBtnStyle}>← Prev</button>
-          <span style={{ fontSize: '1.2rem' }}>Page {page} / {totalPages}</span>
+          <span style={{ fontSize: '1.2rem', color: '#555' }}>Page {page} / {totalPages}</span>
           <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={pageBtnStyle}>Next →</button>
         </div>
       )}
