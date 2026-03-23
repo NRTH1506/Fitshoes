@@ -1,15 +1,32 @@
 # FitShoes
 
-FitShoes is a full-stack shoe store application with a React frontend and an Express/MongoDB backend. It includes OTP-based authentication, Google sign-in, JWT-protected admin access, product management, profile updates, ZaloPay payment flow, request logging, and an AI chatbot.
+FitShoes is a modern, full-stack e-commerce application for footwear, built with a React frontend and an Express/MongoDB backend. It features a premium UI inspired by top brands (Adidas mega-dropdowns, Nike-style shop pages), a comprehensive admin dashboard, advanced product filtering, per-size inventory management, ZaloPay payment integration, and an AI-powered shopping assistant.
 
-## Stack
+## Tech Stack
 
-- Frontend: React, Vite, React Router
-- Backend: Node.js, Express
-- Database: MongoDB with Mongoose
-- Auth: JWT, OTP email verification, Google sign-in
-- Payments: ZaloPay sandbox
-- AI: OpenAI / Gemini-backed chatbot
+- **Frontend:** React, Vite, React Router, Context API
+- **Backend:** Node.js, Express
+- **Database:** MongoDB with Mongoose
+- **Auth:** JWT, OTP email verification, Google OAuth
+- **Payments:** ZaloPay sandbox integration
+- **AI Integration:** OpenAI / Gemini-backed chatbot
+
+## Key Features
+
+### 🛍️ User Experience
+- **Premium UI:** Adidas-style mega dropdown navigation and Nike-style shop rendering.
+- **Advanced Filtering:** Filter products by category (Running, Gym, Casual, etc.), gender, specific sizes, and active sales.
+- **Dynamic Product Pages:** Real-time stock checking per size, dynamic sale pricing, and interactive image galleries.
+- **Seamless Checkout:** Guest users are smoothly redirected to log in and automatically returned to their cart context.
+- **Profile Management:** Users can update details and upload custom avatars.
+- **AI Shopping Assistant:** Built-in AI chatbot to help users find the perfect fit and answer store questions.
+
+### 🛡️ Admin Dashboard
+- **Shop Management:** Full CRUD operations for products, including image uploads, categorizations, and detailed per-size inventory tracking (e.g., specific stock for size 40, size 41).
+- **Sale Campaigns:** Set global or product-specific sale prices and expirations easily. 
+- **Order Tracking:** Track revenue, search by transaction ID, filter by date/status, and update fulfillment status directly.
+- **User Management:** View detailed profiles, sort users, delete accounts, and securely grant/revoke admin privileges or transfer store ownership.
+- **Activity & Audit Logs:** A comprehensive logging system tracking every administrative action (who, what, when, IP address) for security and accountability.
 
 ## Project Structure
 
@@ -30,93 +47,20 @@ Fitshoes-main/
 │  ├─ middleware/
 │  ├─ models/
 │  ├─ routes/
-│  ├─ utils/
+│  ├─ services/
 │  ├─ app.js
 │  ├─ server.js
 │  └─ .env.example
 └─ README.md
 ```
 
-## Main Features
-
-- Browse products and view product details
-- Register and log in with email + OTP verification
-- Sign in with Google
-- JWT-based protected routes
-- Admin and authorized-user access control for admin pages and logs
-- Profile update and avatar upload
-- Order history and ZaloPay payment integration
-- Request, auth, audit, and error logging
-- AI chatbot for store assistance
-
 ## Authentication Flow
 
 1. `POST /api/register` creates an account and sends an OTP.
-2. `POST /api/login` validates credentials and sends an OTP.
-3. `POST /api/verify-otp` completes sign-in and returns:
-
-```json
-{
-  "success": true,
-  "token": "jwt-token",
-  "user": {}
-}
-```
-
-4. `POST /api/login-google` also returns:
-
-```json
-{
-  "success": true,
-  "token": "jwt-token",
-  "user": {}
-}
-```
-
-5. The frontend uses the JWT for protected requests and `GET /api/me` to load the current user.
-
-## Key API Endpoints
-
-### Auth
-
-- `POST /api/register`
-- `POST /api/login`
-- `POST /api/verify-otp`
-- `POST /api/resend-otp`
-- `POST /api/login-google`
-- `GET /api/me`
-
-### Products
-
-- `GET /api/products`
-- `GET /api/products/:id`
-- `POST /api/products/add`
-- `PUT /api/products/:id`
-- `DELETE /api/products/:id`
-
-### User
-
-- `PUT /api/profile`
-- `POST /api/profile/upload`
-- `GET /api/users/:id`
-
-### Orders and Payments
-
-- `GET /api/orders/user/:userId`
-- `POST /api/pay/zalopay`
-- `GET /api/pay/zalopay/query/:app_trans_id`
-- `POST /api/zalopay/callback`
-
-### Admin and Logs
-
-- `GET /api/logs`
-
-### System and Chatbot
-
-- `GET /api/health`
-- `GET /api/ping`
-- `POST /api/chat`
-- `POST /api/chat/clear`
+2. `POST /api/login` validates credentials and sends an OTP (or handles Google OAuth directly).
+3. `POST /api/verify-otp` completes sign-in and returns the JWT token.
+4. The frontend routes users contextually via `redirect` logic (e.g., back to the cart after authentication).
+5. Protected routes and admin panels verify the JWT and corresponding `role`/`canAccessAdmin` permissions.
 
 ## Environment Setup
 
@@ -127,24 +71,15 @@ cd server
 cp .env.example .env
 ```
 
-Important backend variables include:
-
-- `PORT`
+**Required backend variables:**
+- `PORT` (Default: 8081)
 - `MONGO_URI`
 - `JWT_SECRET`
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_API_CLIENT_ID`
-- `GOOGLE_API_CLIENT_SECRET`
-- `GOOGLE_API_REFRESH_TOKEN`
-- `GMAIL_USER`
-- `FE_ORIGINS`
-- `OPENAI_API_KEY`
-- `GEMINI_API_KEY`
-- `ZALOPAY_APP_ID`
-- `ZALOPAY_KEY1`
-- `ZALOPAY_KEY2`
-- `ZALOPAY_ENDPOINT`
-- `ZALOPAY_CALLBACK_URL`
+- `ADMIN_EMAIL` (Crucial for bootstrapping the initial admin owner account)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_API_CLIENT_ID`, `GOOGLE_API_CLIENT_SECRET`, `GOOGLE_API_REFRESH_TOKEN`
+- `GMAIL_USER`, `GMAIL_APP_PASSWORD`
+- `OPENAI_API_KEY` or `GEMINI_API_KEY`
+- `ZALOPAY_APP_ID`, `ZALOPAY_KEY1`, `ZALOPAY_KEY2`, `ZALOPAY_ENDPOINT`, `ZALOPAY_CALLBACK_URL`
 
 ## Local Development
 
@@ -155,8 +90,7 @@ cd server
 npm install
 npm start
 ```
-
-Backend runs on `http://localhost:8081` by default.
+The backend runs on `http://localhost:8081` by default.
 
 ### Frontend
 
@@ -165,25 +99,16 @@ cd client
 npm install
 npm run dev
 ```
+The frontend runs on `http://localhost:5173` by default.
 
-Frontend runs on `http://localhost:5173` by default.
+## API Architecture
 
-## Admin Access
-
-Admin-only operations use JWT authentication and require one of these:
-
-- `user.role === "admin"`
-- `user.canAccessAdmin === true`
-
-This applies to product management and log access.
-
-## Notes
-
-- Product reads can fall back to `server/static-products.json` if MongoDB is unavailable.
-- Uploaded avatars are stored under `server/uploads/`.
-- Health check is available at `GET /api/health`.
-- The backend entry point is `server/server.js`, while Express app configuration lives in `server/app.js`.
+- **/api/auth**: Login, registration, OTP, Google Auth, session retrieval.
+- **/api/products**: Public product listing and filtering.
+- **/api/admin**: Protected routes for orders, user management, product mutation, sales, and activity logs.
+- **/api/pay**: ZaloPay handshake and callback webhooks.
+- **/api/chat**: AI integration endpoints.
 
 ## License
 
-This project is intended for learning and portfolio use.
+This project is intended for learning, portfolio use, and demonstrating full-stack e-commerce architecture.
