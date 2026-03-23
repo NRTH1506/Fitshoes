@@ -5,7 +5,7 @@ function normalizeEmail(value) {
 }
 
 async function ensureAdminUser(hasher) {
-  const adminEmail = normalizeEmail(process.env.ADMIN_EMAIL || 'admin@fitshoes.local');
+  const adminEmail = normalizeEmail(process.env.ADMIN_EMAIL || '');
   const adminPassword = String(process.env.ADMIN_PASSWORD || 'Admin@123456');
   const adminName = String(process.env.ADMIN_NAME || 'FitShoes Admin').trim();
 
@@ -17,19 +17,24 @@ async function ensureAdminUser(hasher) {
   let user = await User.findOne({ email: adminEmail });
 
   if (!user) {
-    const passwordHash = await hasher.hashPassword(adminPassword);
-    user = await User.create({
-      name: adminName,
-      email: adminEmail,
-      passwordHash,
-      role: 'admin',
-      canAccessAdmin: true
-    });
-
-    console.log(`[bootstrapAdmin] Created admin user: ${user.email}`);
+    // Create admin user — passwordHash may be empty for Google OAuth users
+    try {
+      const passwordHash = await hasher.hashPassword(adminPassword);
+      user = await User.create({
+        name: adminName,
+        email: adminEmail,
+        passwordHash,
+        role: 'admin',
+        canAccessAdmin: true
+      });
+      console.log(`[bootstrapAdmin] Created admin user: ${user.email}`);
+    } catch (err) {
+      console.error('[bootstrapAdmin] Create failed:', err.message);
+    }
     return;
   }
 
+  // User exists — ensure admin privileges
   let changed = false;
 
   if (user.role !== 'admin') {
@@ -45,6 +50,8 @@ async function ensureAdminUser(hasher) {
   if (changed) {
     await user.save();
     console.log(`[bootstrapAdmin] Updated admin access for: ${user.email}`);
+  } else {
+    console.log(`[bootstrapAdmin] Admin user already configured: ${user.email}`);
   }
 }
 

@@ -1,3 +1,5 @@
+const AdminLog = require('../models/AdminLog');
+
 module.exports = ({
     Product,
     buildProductPayload,
@@ -42,6 +44,7 @@ module.exports = ({
                 price: product.price,
                 currency: product.currency
             });
+            AdminLog.create({ action: 'ADD_PRODUCT', adminId: req.user?.id || 'unknown', adminEmail: req.user?.email || 'unknown', targetType: 'product', targetId: String(product._id), details: { title_vi: product.title_vi, price: product.price }, ip: req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || '' }).catch(() => {});
             return res.status(201).json({ success: true, message: 'Thêm sản phẩm thành công', product });
         } catch (err) {
             console.error(err);
@@ -126,6 +129,7 @@ module.exports = ({
 
                 if (product) {
                     logProductUpdate(req.user?.id || 'unknown', req.user?.email || 'unknown', req.params.id, product);
+                    AdminLog.create({ action: 'UPDATE_PRODUCT', adminId: req.user?.id || 'unknown', adminEmail: req.user?.email || 'unknown', targetType: 'product', targetId: req.params.id, details: { title_vi: product.title_vi }, ip: req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || '' }).catch(() => {});
                     return res.json({ success: true, message: 'Cập nhật sản phẩm thành công', product });
                 }
             } catch (e) { }
@@ -148,6 +152,7 @@ module.exports = ({
                 const product = await Product.findByIdAndDelete(req.params.id);
                 if (product) {
                     logProductDelete(req.user?.id || 'unknown', req.user?.email || 'unknown', req.params.id, product.title_vi || product.title);
+                    AdminLog.create({ action: 'DELETE_PRODUCT', adminId: req.user?.id || 'unknown', adminEmail: req.user?.email || 'unknown', targetType: 'product', targetId: req.params.id, details: { title_vi: product.title_vi || product.title }, ip: req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || '' }).catch(() => {});
                     return res.json({ success: true, message: 'Xóa sản phẩm thành công', product });
                 }
             } catch (e) { }
